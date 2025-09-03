@@ -42,7 +42,7 @@ export default function CombatStatsPanel({
   const loadCombatStats = useCallback(async () => {
     try {
       console.log("Loading combat stats for character:", character.$id);
-      
+
       // Try to get existing combat stats with caching
       const response = await fetch(
         `/api/combat-stats?characterId=${character.$id}`
@@ -60,12 +60,12 @@ export default function CombatStatsPanel({
         const errorData = await response.text();
         console.log("Combat stats not found, error:", errorData);
         setError(`Failed to load: ${errorData}`);
-        
+
         // Create new combat stats if none exist
         console.log("Creating new combat stats for character:", character);
         const newStats = calculateBaseCombatStats(character);
         console.log("New stats calculated:", newStats);
-        
+
         const createResponse = await fetch("/api/combat-stats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

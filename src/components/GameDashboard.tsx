@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   Zap,
   Dumbbell,
@@ -17,25 +17,18 @@ import {
   FileText,
 } from "lucide-react";
 import { DatabaseCharacter } from "@/types/database";
-import { databases, DATABASE_ID, COLLECTIONS, client } from "@/lib/appwrite";
+import { databases, DATABASE_ID, COLLECTIONS } from "@/lib/appwrite";
 import CombatStatsPanel from "./CombatStatsPanel";
 import SkillBooksPanel from "./SkillBooksPanel";
 import CultivationTechniques from "./CultivationTechniques";
 import BreakthroughPanel from "./BreakthroughPanel";
 import { getRealmDisplayName } from "@/data/realms";
+import { useOptimizedChat } from "@/hooks/useOptimizedChat";
 
 interface User {
   $id: string;
   name?: string;
   email: string;
-}
-
-interface ChatMessage {
-  $id: string;
-  userId: string;
-  characterName: string;
-  message: string;
-  timestamp: string;
 }
 
 interface GameDashboardProps {
@@ -59,10 +52,15 @@ export default function GameDashboard({
 
   // Chat and Activity Tab States
   const [activeTab, setActiveTab] = useState<"activity" | "chat">("activity");
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [isLoadingChat, setIsLoadingChat] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Use optimized chat hook
+  const {
+    messages: chatMessages,
+    isLoading: isLoadingChat,
+    messagesEndRef,
+    sendMessage: optimizedSendMessage,
+  } = useOptimizedChat(activeTab === "chat");
 
   // Load cultivation rate data when character changes
   useEffect(() => {
@@ -169,91 +167,23 @@ export default function GameDashboard({
   ]); // Dependencies cho cultivation system
 
   // Chat Functions
-  const loadChatMessages = useCallback(async () => {
-    try {
-      setIsLoadingChat(true);
-      const response = await fetch("/api/chat");
-      if (response.ok) {
-        const data = await response.json();
-        setChatMessages(data.messages);
-        // Scroll to bottom after loading messages
-        setTimeout(() => scrollToBottom(), 100);
-      }
-    } catch (error) {
-      console.error("Error loading chat messages:", error);
-    } finally {
-      setIsLoadingChat(false);
-    }
-  }, []);
-
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user.$id,
-          characterName: currentCharacter.name,
-          message: newMessage.trim(),
-        }),
-      });
+    const success = await optimizedSendMessage(
+      user.$id,
+      currentCharacter.name,
+      newMessage
+    );
 
-      if (response.ok) {
-        setNewMessage("");
-        // Message will be added automatically via realtime subscription
-      } else {
-        console.error("Failed to send message");
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
+    if (success) {
+      setNewMessage("");
+    } else {
+      console.error("Failed to send message");
     }
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  // Load chat messages when chat tab is opened (only once)
-  useEffect(() => {
-    if (activeTab === "chat") {
-      loadChatMessages();
-    }
-  }, [activeTab, loadChatMessages]);
-
-  // Realtime chat subscription
-  useEffect(() => {
-    if (activeTab === "chat") {
-      const unsubscribe = client.subscribe(
-        `databases.${DATABASE_ID}.collections.${COLLECTIONS.CHAT_MESSAGES}.documents`,
-        (response) => {
-          if (
-            response.events.includes(
-              "databases.*.collections.*.documents.*.create"
-            )
-          ) {
-            const newMessage = response.payload as ChatMessage;
-            setChatMessages((prev) => {
-              // Check if message already exists to avoid duplicates
-              if (prev.some((msg) => msg.$id === newMessage.$id)) {
-                return prev;
-              }
-              // Add new message and keep only last 20
-              return [...prev, newMessage].slice(-20);
-            });
-            setTimeout(() => scrollToBottom(), 100);
-          }
-        }
-      );
-
-      return () => {
-        unsubscribe();
-      };
-    }
-  }, [activeTab]);
+  // Remove old chat loading effect - now handled by useOptimizedChat hook
 
   const cultivationPaths = {
     qi: { name: "Khí Tu", color: "blue", icon: Zap },

@@ -12,23 +12,28 @@ const MAX_MESSAGES = 20; // Chỉ giữ lại 20 tin nhắn mới nhất
 
 export async function GET() {
     try {
-        // Lấy 20 tin nhắn mới nhất
+        // Lấy 20 tin nhắn mới nhất với cache headers
         const messages = await databases.listDocuments(
             process.env.APPWRITE_DATABASE_ID!,
             'chat_messages',
             [
                 Query.orderDesc('timestamp'),
-                Query.limit(MAX_MESSAGES)
+                Query.limit(MAX_MESSAGES),
+                Query.select(['$id', 'userId', 'characterName', 'message', 'timestamp'])
             ]
         );
 
         // Reverse để hiển thị từ cũ đến mới
         const sortedMessages = messages.documents.reverse();
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             messages: sortedMessages
         });
+
+        // Add cache headers to reduce server load
+        response.headers.set('Cache-Control', 'public, max-age=10, stale-while-revalidate=30');
+        return response;
     } catch (error) {
         console.error('Error fetching chat messages:', error);
         return NextResponse.json(
@@ -50,14 +55,15 @@ export async function POST(request: NextRequest) {
         }
 
         // Kiểm tra độ dài message
-        if (message.trim().length === 0) {
+        const trimmedMessage = message.trim();
+        if (trimmedMessage.length === 0) {
             return NextResponse.json(
                 { success: false, error: 'Tin nhắn không được để trống' },
                 { status: 400 }
             );
         }
 
-        if (message.length > 500) {
+        if (trimmedMessage.length > 500) {
             return NextResponse.json(
                 { success: false, error: 'Tin nhắn quá dài (tối đa 500 ký tự)' },
                 { status: 400 }
@@ -72,36 +78,43 @@ export async function POST(request: NextRequest) {
             {
                 userId,
                 characterName,
-                message: message.trim(),
+                message: trimmedMessage,
                 timestamp: new Date().toISOString()
             }
         );
 
-        // Kiểm tra và xóa tin nhắn cũ nếu có quá 20 tin
-        const allMessages = await databases.listDocuments(
-            process.env.APPWRITE_DATABASE_ID!,
-            'chat_messages',
-            [
-                Query.orderDesc('timestamp')
-            ]
-        );
+        // Asynchronously cleanup old messages (don't wait for it)
+        setImmediate(async () => {
+            try {
+                const allMessages = await databases.listDocuments(
+                    process.env.APPWRITE_DATABASE_ID!,
+                    'chat_messages',
+                    [
+                        Query.orderDesc('timestamp'),
+                        Query.limit(MAX_MESSAGES + 10) // Get a few extra to check
+                    ]
+                );
 
-        // Nếu có quá 20 tin nhắn, xóa những tin cũ nhất
-        if (allMessages.documents.length > MAX_MESSAGES) {
-            const messagesToDelete = allMessages.documents.slice(MAX_MESSAGES);
+                if (allMessages.documents.length > MAX_MESSAGES) {
+                    const messagesToDelete = allMessages.documents.slice(MAX_MESSAGES);
 
-            for (const msg of messagesToDelete) {
-                try {
-                    await databases.deleteDocument(
-                        process.env.APPWRITE_DATABASE_ID!,
-                        'chat_messages',
-                        msg.$id
+                    // Delete in batches to avoid overwhelming the database
+                    const deletePromises = messagesToDelete.map(msg =>
+                        databases.deleteDocument(
+                            process.env.APPWRITE_DATABASE_ID!,
+                            'chat_messages',
+                            msg.$id
+                        ).catch(error => {
+                            console.error('Error deleting old message:', error);
+                        })
                     );
-                } catch (deleteError) {
-                    console.error('Error deleting old message:', deleteError);
+
+                    await Promise.allSettled(deletePromises);
                 }
+            } catch (cleanupError) {
+                console.error('Error in async cleanup:', cleanupError);
             }
-        }
+        });
 
         return NextResponse.json({
             success: true,

@@ -451,9 +451,7 @@ const CultivationTechniques: React.FC<CultivationTechniquesProps> = ({
             <div
               key={technique.$id}
               className={`bg-gray-800 rounded-lg border-2 p-4 transition-all cursor-pointer hover:shadow-lg hover:bg-gray-750 ${
-                learned
-                  ? "border-green-500 bg-green-900/20"
-                  : "border-gray-600"
+                learned ? "border-green-500 bg-green-900/20" : "border-gray-600"
               } ${
                 selectedTechnique?.$id === technique.$id
                   ? "ring-2 ring-purple-400"
@@ -497,7 +495,9 @@ const CultivationTechniques: React.FC<CultivationTechniquesProps> = ({
               {learned && (
                 <div className="bg-gray-700 rounded p-2 mb-3 border border-gray-600">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-white">Cấp độ: {learned.level}/10</span>
+                    <span className="text-white">
+                      Cấp độ: {learned.level}/10
+                    </span>
                     <span className="text-green-400">
                       {Math.round(learned.currentEffectiveness * 100)}% hiệu quả
                     </span>
