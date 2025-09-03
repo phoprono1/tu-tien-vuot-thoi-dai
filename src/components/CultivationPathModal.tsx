@@ -88,7 +88,7 @@ export default function CultivationPathModal({
         {
           userId: userId,
           name: username || "Tu Tiên Giả",
-          level: 3,
+          level: 1,
           realm: "Luyện Khí",
           stage: 1,
           cultivationPath: path.id,
