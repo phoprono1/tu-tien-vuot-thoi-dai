@@ -8,8 +8,6 @@ export interface DatabaseCharacter {
     stage: number;
     cultivationPath: 'qi' | 'body' | 'demon';
     experience: number;
-    health: number;
-    maxHealth: number;
     energy: number;
     maxEnergy: number;
     spiritualPower: number;

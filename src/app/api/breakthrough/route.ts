@@ -38,6 +38,25 @@ export async function GET(request: NextRequest) {
         // Check breakthrough requirements
         const breakthroughInfo = canBreakthrough(currentLevel, currentQi, spiritStones);
 
+        // Get combat stats for health info
+        let healthInfo = { health: 100, maxHealth: 100 };
+        try {
+            const combatStatsResponse = await databases.listDocuments(
+                DATABASE_ID,
+                COLLECTIONS.COMBAT_STATS,
+                [Query.equal('characterId', characterId)]
+            );
+            if (combatStatsResponse.documents.length > 0) {
+                const combatStats = combatStatsResponse.documents[0];
+                healthInfo = {
+                    health: combatStats.currentHealth,
+                    maxHealth: combatStats.maxHealth
+                };
+            }
+        } catch (error) {
+            console.warn('Failed to fetch combat stats for health info:', error);
+        }
+
         return NextResponse.json({
             success: true,
             characterId,
@@ -59,8 +78,8 @@ export async function GET(request: NextRequest) {
             resources: {
                 currentQi,
                 spiritStones,
-                health: character.health,
-                maxHealth: character.maxHealth
+                health: healthInfo.health,
+                maxHealth: healthInfo.maxHealth
             }
         });
 
@@ -134,8 +153,24 @@ export async function POST(request: NextRequest) {
 
             if (!tribulationSuccess) {
                 // Failed tribulation - take damage and consume resources anyway
-                tribulationDamage = Math.floor(character.maxHealth * 0.3); // 30% max health damage
+                // Get combat stats to calculate damage
+                let maxHealthForDamage = 100;
+                try {
+                    const combatStatsResponse = await databases.listDocuments(
+                        DATABASE_ID,
+                        COLLECTIONS.COMBAT_STATS,
+                        [Query.equal('characterId', characterId)]
+                    );
+                    if (combatStatsResponse.documents.length > 0) {
+                        maxHealthForDamage = combatStatsResponse.documents[0].maxHealth;
+                    }
+                } catch (error) {
+                    console.warn('Failed to fetch combat stats for tribulation damage:', error);
+                }
 
+                tribulationDamage = Math.floor(maxHealthForDamage * 0.3); // 30% max health damage
+
+                // Update character and apply damage to combat stats
                 await databases.updateDocument(
                     DATABASE_ID,
                     COLLECTIONS.CHARACTERS,
@@ -143,10 +178,31 @@ export async function POST(request: NextRequest) {
                     {
                         qi: Math.max(0, currentQi - Math.floor(requirements.qiRequired * 0.5)),
                         spiritStones: Math.max(0, spiritStones - Math.floor(requirements.spiritStonesRequired * 0.5)),
-                        health: Math.max(1, character.health - tribulationDamage),
                         tribulationResistance: (character.tribulationResistance || 0) + 1 // Gain resistance for next attempt
                     }
                 );
+
+                // Apply damage to combat stats
+                try {
+                    const combatStatsResponse = await databases.listDocuments(
+                        DATABASE_ID,
+                        COLLECTIONS.COMBAT_STATS,
+                        [Query.equal('characterId', characterId)]
+                    );
+                    if (combatStatsResponse.documents.length > 0) {
+                        const combatStats = combatStatsResponse.documents[0];
+                        await databases.updateDocument(
+                            DATABASE_ID,
+                            COLLECTIONS.COMBAT_STATS,
+                            combatStats.$id,
+                            {
+                                currentHealth: Math.max(1, combatStats.currentHealth - tribulationDamage)
+                            }
+                        );
+                    }
+                } catch (error) {
+                    console.warn('Failed to apply tribulation damage to combat stats:', error);
+                }
 
                 return NextResponse.json({
                     success: false,
@@ -156,7 +212,6 @@ export async function POST(request: NextRequest) {
                     newStats: {
                         qi: Math.max(0, currentQi - Math.floor(requirements.qiRequired * 0.5)),
                         spiritStones: Math.max(0, spiritStones - Math.floor(requirements.spiritStonesRequired * 0.5)),
-                        health: Math.max(1, character.health - tribulationDamage),
                         tribulationResistance: (character.tribulationResistance || 0) + 1
                     }
                 });
@@ -169,9 +224,7 @@ export async function POST(request: NextRequest) {
         const newRealmDisplayName = getRealmDisplayName(newLevel);
 
         // Calculate new stats based on realm bonuses
-        const baseHealth = 100; // Base health
         const baseEnergy = 100;  // Base energy
-        const newMaxHealth = Math.floor(baseHealth * (newRealm?.realmBonuses.healthMultiplier || 1));
         const newMaxEnergy = Math.floor(baseEnergy * (newRealm?.realmBonuses.energyMultiplier || 1));
 
         // Update character
@@ -180,9 +233,7 @@ export async function POST(request: NextRequest) {
             realm: newRealm?.name || character.realm,
             qi: currentQi - requirements.qiRequired,
             spiritStones: spiritStones - requirements.spiritStonesRequired,
-            maxHealth: newMaxHealth,
             maxEnergy: newMaxEnergy,
-            health: Math.min(character.health, newMaxHealth), // Don't exceed new max
             energy: Math.min(character.energy, newMaxEnergy),
             experience: 0, // Reset experience for new realm
             cultivationProgress: 0,
@@ -273,7 +324,6 @@ export async function POST(request: NextRequest) {
             newStats: {
                 level: newLevel,
                 realm: newRealm?.name,
-                maxHealth: newMaxHealth,
                 maxEnergy: newMaxEnergy,
                 qi: currentQi - requirements.qiRequired,
                 spiritStones: spiritStones - requirements.spiritStonesRequired,
