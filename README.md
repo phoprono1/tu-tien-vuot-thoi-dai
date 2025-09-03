@@ -8,7 +8,7 @@ Tu Tiên MMO Web Game - Một thế giới tu tiên đầy thách thức với 3
 ✅ **PWA with offline support**  
 ✅ **Realtime multiplayer with Appwrite**  
 ✅ **Mobile-first responsive design**  
-✅ **Zero-config Vercel deployment**  
+✅ **Zero-config Vercel deployment**
 
 ## ⚡ Tính năng chính
 

@@ -186,7 +186,9 @@ export default function Home() {
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Zap className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <h4 className="text-xl sm:text-2xl font-bold text-blue-300 mb-4">Khí Tu</h4>
+              <h4 className="text-xl sm:text-2xl font-bold text-blue-300 mb-4">
+                Khí Tu
+              </h4>
               <p className="text-sm sm:text-base text-gray-300 mb-4">
                 Con đường truyền thống, hấp thụ linh khí từ thiên địa để tu
                 luyện. Cân bằng và ổn định nhất.
@@ -203,7 +205,9 @@ export default function Home() {
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <h4 className="text-xl sm:text-2xl font-bold text-green-300 mb-4">Thể Tu</h4>
+              <h4 className="text-xl sm:text-2xl font-bold text-green-300 mb-4">
+                Thể Tu
+              </h4>
               <p className="text-sm sm:text-base text-gray-300 mb-4">
                 Tôi luyện thể phách, dựa vào sức mạnh của cơ thể. Chậm nhưng bền
                 bỉ và mạnh mẽ.
@@ -220,7 +224,9 @@ export default function Home() {
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Sword className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <h4 className="text-xl sm:text-2xl font-bold text-red-300 mb-4">Ma Tu</h4>
+              <h4 className="text-xl sm:text-2xl font-bold text-red-300 mb-4">
+                Ma Tu
+              </h4>
               <p className="text-sm sm:text-base text-gray-300 mb-4">
                 Con đường tà đạo, tăng sức mạnh qua việc sát sinh. Nguy hiểm
                 nhưng quyền năng to lớn.
@@ -244,7 +250,9 @@ export default function Home() {
               <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-4 text-purple-400">
                 <Users className="w-full h-full" />
               </div>
-              <h5 className="font-bold text-white mb-2 text-sm sm:text-base">PvP Combat</h5>
+              <h5 className="font-bold text-white mb-2 text-sm sm:text-base">
+                PvP Combat
+              </h5>
               <p className="text-gray-300 text-xs sm:text-sm">
                 Chiến đấu với người chơi khác để tranh giành tài nguyên
               </p>
@@ -253,7 +261,9 @@ export default function Home() {
               <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-4 text-yellow-400">
                 <TrendingUp className="w-full h-full" />
               </div>
-              <h5 className="font-bold text-white mb-2 text-sm sm:text-base">PvE Trials</h5>
+              <h5 className="font-bold text-white mb-2 text-sm sm:text-base">
+                PvE Trials
+              </h5>
               <p className="text-gray-300 text-xs sm:text-sm">
                 Thử thách thí luyện để nhận phần thưởng
               </p>
@@ -262,7 +272,9 @@ export default function Home() {
               <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-4 text-green-400">
                 <Sword className="w-full h-full" />
               </div>
-              <h5 className="font-bold text-white mb-2 text-sm sm:text-base">Combat System</h5>
+              <h5 className="font-bold text-white mb-2 text-sm sm:text-base">
+                Combat System
+              </h5>
               <p className="text-gray-300 text-xs sm:text-sm">
                 Hệ thống chiến đấu lượt với hiệu ứng và debuff
               </p>
@@ -271,7 +283,9 @@ export default function Home() {
               <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-4 text-blue-400">
                 <Star className="w-full h-full" />
               </div>
-              <h5 className="font-bold text-white mb-2 text-sm sm:text-base">Thiên Kiếp</h5>
+              <h5 className="font-bold text-white mb-2 text-sm sm:text-base">
+                Thiên Kiếp
+              </h5>
               <p className="text-gray-300 text-xs sm:text-sm">
                 Vượt qua thử thách của trời đất để đột phá
               </p>
@@ -281,7 +295,9 @@ export default function Home() {
 
         {/* Quick Access Links */}
         <div className="text-center mb-6 sm:mb-8">
-          <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Truy cập nhanh</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
+            Truy cập nhanh
+          </h3>
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-4">
             <a
               href="/admin/trials"

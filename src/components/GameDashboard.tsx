@@ -329,7 +329,8 @@ export default function GameDashboard({
                     <div className="flex items-center">
                       <Clock className="w-3 h-3 mr-1" />
                       <span className="hidden sm:inline">Tu vi:</span>
-                      <span className="sm:hidden">TL:</span> {cultivationRate.finalRate.toFixed(1)}/s
+                      <span className="sm:hidden">TL:</span>{" "}
+                      {cultivationRate.finalRate.toFixed(1)}/s
                     </div>
                     {cultivationRate.totalBonusPercentage > 0 && (
                       <span className="text-green-400 text-xs">
@@ -476,7 +477,9 @@ export default function GameDashboard({
                     <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
                   </div>
                   <div className="font-bold text-sm sm:text-base">Tu Luyện</div>
-                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">Hấp thụ linh khí</div>
+                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">
+                    Hấp thụ linh khí
+                  </div>
                 </div>
               </button>
 
@@ -490,7 +493,9 @@ export default function GameDashboard({
                     <Zap className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
                   </div>
                   <div className="font-bold text-sm sm:text-base">Đột Phá</div>
-                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">Vượt thiên kiếp</div>
+                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">
+                    Vượt thiên kiếp
+                  </div>
                 </div>
               </button>
 
@@ -503,8 +508,12 @@ export default function GameDashboard({
                   <div className="mb-1 sm:mb-2 flex justify-center">
                     <Swords className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
                   </div>
-                  <div className="font-bold text-sm sm:text-base">Chiến Đấu</div>
-                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">PvP & PvE</div>
+                  <div className="font-bold text-sm sm:text-base">
+                    Chiến Đấu
+                  </div>
+                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">
+                    PvP & PvE
+                  </div>
                 </div>
               </a>
 
@@ -518,7 +527,9 @@ export default function GameDashboard({
                     <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
                   </div>
                   <div className="font-bold text-sm sm:text-base">Cửa Hàng</div>
-                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">Mua trang bị</div>
+                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">
+                    Mua trang bị
+                  </div>
                 </div>
               </button>
 
@@ -531,8 +542,12 @@ export default function GameDashboard({
                   <div className="mb-1 sm:mb-2 flex justify-center">
                     <Users className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
                   </div>
-                  <div className="font-bold text-sm sm:text-base">Bang Phái</div>
-                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">Gia nhập tổ chức</div>
+                  <div className="font-bold text-sm sm:text-base">
+                    Bang Phái
+                  </div>
+                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">
+                    Gia nhập tổ chức
+                  </div>
                 </div>
               </button>
 
@@ -546,7 +561,9 @@ export default function GameDashboard({
                     <Package className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
                   </div>
                   <div className="font-bold text-sm sm:text-base">Túi Đồ</div>
-                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">Quản lý vật phẩm</div>
+                  <div className="text-xs sm:text-sm opacity-80 hidden sm:block">
+                    Quản lý vật phẩm
+                  </div>
                 </div>
               </button>
             </div>

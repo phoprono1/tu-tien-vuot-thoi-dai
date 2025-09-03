@@ -14,18 +14,20 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Tu Tiên Vượt Thời Đại - MMO Cultivation Game",
-  description: "Nhập vai tu tiên, khám phá thế giới tu luyện bí ẩn. Chọn con đường tu luyện của bạn và trở thành bậc thầy tu tiên.",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+  description:
+    "Nhập vai tu tiên, khám phá thế giới tu luyện bí ẩn. Chọn con đường tu luyện của bạn và trở thành bậc thầy tu tiên.",
+  viewport:
+    "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   themeColor: "#9333ea",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Tu Tiên Game"
+    title: "Tu Tiên Game",
   },
   formatDetection: {
-    telephone: false
+    telephone: false,
   },
-  manifest: "/manifest.json"
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -36,10 +38,16 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
         <meta name="apple-mobile-web-app-title" content="Tu Tiên Game" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>

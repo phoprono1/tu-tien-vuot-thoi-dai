@@ -3,13 +3,15 @@
 ## 🚀 Vercel Deployment for 100-200 Players
 
 ### Tại sao Vercel phù hợp:
+
 - ✅ **Serverless Functions**: API routes tự động scale theo lượng truy cập
-- ✅ **Global CDN**: Fast loading trên toàn cầu 
+- ✅ **Global CDN**: Fast loading trên toàn cầu
 - ✅ **Auto Scaling**: Tự động scale up/down theo traffic
 - ✅ **Zero Config**: Deploy trực tiếp từ Git
 - ✅ **Free Tier**: Đủ cho 100-200 concurrent users
 
 ### Performance Optimization:
+
 - ✅ Next.js 15 với Turbopack - Build và runtime cực nhanh
 - ✅ PWA với Service Worker - Offline caching
 - ✅ Appwrite realtime - Giảm tải server polling
@@ -18,6 +20,7 @@
 ## Deployment Steps:
 
 1. **Push to GitHub**:
+
    ```bash
    git add .
    git commit -m "Ready for Vercel deployment"
@@ -25,6 +28,7 @@
    ```
 
 2. **Vercel Configuration**:
+
    - Import project from GitHub
    - Framework: Next.js
    - Build Command: `npm run build`
@@ -41,12 +45,14 @@
 ## Load Testing Estimates:
 
 ### For 100-200 concurrent users:
+
 - **Vercel Serverless**: 1000 function executions/hour free tier
-- **Appwrite**: 75,000 API calls/month free tier  
+- **Appwrite**: 75,000 API calls/month free tier
 - **Database**: Real-time subscriptions handle concurrency
 - **Bandwidth**: PWA caching giảm 70% requests
 
 ### Expected Performance:
+
 - **Page Load**: <2s globally (CDN + PWA cache)
 - **API Response**: <500ms average
 - **Realtime Chat**: <100ms latency
@@ -68,12 +74,14 @@
 ## Monitoring & Scaling:
 
 Use Vercel Analytics để monitor:
+
 - Function execution time
 - Error rates
 - Traffic patterns
 - User engagement
 
 Nếu traffic tăng cao hơn:
+
 - Upgrade Vercel Pro ($20/month)
 - Optimize database queries
 - Implement Redis caching
@@ -90,12 +98,14 @@ Nếu traffic tăng cao hơn:
 ## Cost Estimation:
 
 **Free Tier (đủ cho 100-200 users):**
+
 - Vercel: Free (100GB bandwidth, 1000 serverless functions/hour)
 - Appwrite: Free (75,000 requests/month, 2GB bandwidth)
 - Total: $0/month
 
 **If scaling needed:**
-- Vercel Pro: $20/month (unlimited functions, analytics)  
+
+- Vercel Pro: $20/month (unlimited functions, analytics)
 - Appwrite Pro: $15/month (1M requests, 150GB bandwidth)
 - Total: $35/month cho enterprise-level performance
 

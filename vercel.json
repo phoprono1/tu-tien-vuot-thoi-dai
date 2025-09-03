@@ -9,24 +9,19 @@
       "runtime": "nodejs20.x"
     }
   },
-  "regions": ["hnd1", "sin1", "syd1"],
-  "env": {
-    "NEXT_PUBLIC_APPWRITE_PROJECT_ID": "@appwrite_project_id",
-    "NEXT_PUBLIC_APPWRITE_PROJECT_NAME": "@appwrite_project_name", 
-    "NEXT_PUBLIC_APPWRITE_ENDPOINT": "@appwrite_endpoint",
-    "NEXT_PUBLIC_APPWRITE_DATABASE_ID": "@appwrite_database_id",
-    "APPWRITE_ENDPOINT": "@appwrite_endpoint",
-    "APPWRITE_PROJECT_ID": "@appwrite_project_id",
-    "APPWRITE_DATABASE_ID": "@appwrite_database_id",
-    "APPWRITE_API_KEY": "@appwrite_api_key"
-  },
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        },
         { "key": "Cache-Control", "value": "no-store, max-age=0" }
       ]
     },
@@ -37,7 +32,7 @@
       ]
     },
     {
-      "source": "/sw.js", 
+      "source": "/sw.js",
       "headers": [
         { "key": "Content-Type", "value": "application/javascript" },
         { "key": "Service-Worker-Allowed", "value": "/" },
