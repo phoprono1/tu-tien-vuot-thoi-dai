@@ -1,36 +1,168 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tu Tiên Vượt Thời Đại 🌟
 
-## Getting Started
+**PRODUCTION READY FOR VERCEL DEPLOYMENT**
 
-First, run the development server:
+Tu Tiên MMO Web Game - Một thế giới tu tiên đầy thách thức với 3 con đường tu luyện khác nhau!
+
+✅ **Optimized for 100-200 concurrent players**  
+✅ **PWA with offline support**  
+✅ **Realtime multiplayer with Appwrite**  
+✅ **Mobile-first responsive design**  
+✅ **Zero-config Vercel deployment**  
+
+## ⚡ Tính năng chính
+
+### 🎯 Ba con đường tu luyện
+
+- **Khí Tu**: Con đường truyền thống, cân bằng và ổn định
+- **Thể Tu**: Tôi luyện thể phách, chậm nhưng mạnh mẽ
+- **Ma Tu**: Con đường tà đạo, nguy hiểm nhưng quyền năng
+
+### 🌩️ Hệ thống thiên kiếp
+
+- Vượt qua thử thách của trời đất để đột phá
+- Mỗi con đường tu luyện có cơ chế thiên kiếp riêng
+- Ma tu có thể chống lại thiên kiếp bằng sát khí
+
+### ⚔️ Tính năng MMO
+
+- **PvP Combat**: Chiến đấu thời gian thực với người chơi
+- **Guild System**: Tham gia bang phái, chinh phục lãnh thổ
+- **Real-time Chat**: Tương tác với cộng đồng
+- **Boss Raids**: Hợp tác tiêu diệt boss mạnh
+
+## 🛠️ Công nghệ sử dụng
+
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS
+- **Backend**: Appwrite (BaaS)
+- **Database**: Appwrite Database
+- **Authentication**: Appwrite Auth
+- **Real-time**: Appwrite Realtime
+- **Storage**: Appwrite Storage
+
+## 🚀 Cài đặt và chạy
+
+### Yêu cầu hệ thống
+
+- Node.js 18+
+- npm hoặc yarn
+- Tài khoản Appwrite
+
+### Cài đặt
+
+1. Clone repository:
+
+```bash
+git clone https://github.com/your-username/tu-tien-vuot-thoi-dai.git
+cd tu-tien-vuot-thoi-dai
+```
+
+2. Cài đặt dependencies:
+
+```bash
+npm install
+```
+
+3. Cấu hình Appwrite:
+   - Tạo project mới trên [Appwrite Console](https://cloud.appwrite.io)
+   - Copy Project ID và Endpoint
+   - Tạo file `.env.local`:
+
+```env
+NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=tu-tien-database
+```
+
+4. Chạy development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mở [http://localhost:3000](http://localhost:3000) để xem kết quả.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Cấu trúc dự án
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/                    # App Router pages
+│   ├── layout.tsx         # Root layout
+│   ├── page.tsx           # Homepage
+│   └── globals.css        # Global styles
+├── components/            # React components
+├── lib/                   # Utilities
+│   └── appwrite.ts       # Appwrite configuration
+├── types/                # TypeScript types
+│   └── game.ts           # Game-related types
+└── styles/               # Additional styles
+```
 
-## Learn More
+## 🎮 Gameplay
 
-To learn more about Next.js, take a look at the following resources:
+### Bắt đầu game
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Đăng ký tài khoản
+2. Tạo nhân vật và chọn con đường tu luyện
+3. Hoàn thành hướng dẫn cơ bản
+4. Bắt đầu hành trình tu tiên
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Cơ chế tu luyện
 
-## Deploy on Vercel
+- **Hấp thụ linh khí**: Tự động theo thời gian
+- **Đột phá cảnh giới**: Vượt qua thiên kiếp
+- **Tăng sức mạnh**: Qua chiến đấu và tu luyện
+- **Thu thập tài nguyên**: Từ PvP, PvE và khám phá
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔮 Roadmap
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Phase 1 (MVP) ✅
+
+- [x] Thiết lập dự án Next.js + Appwrite
+- [x] Giao diện landing page
+- [x] Cấu hình cơ bản
+
+### Phase 2 (Core Game)
+
+- [ ] Hệ thống đăng ký/đăng nhập
+- [ ] Tạo và quản lý nhân vật
+- [ ] Hệ thống tu luyện cơ bản
+- [ ] Ba con đường tu luyện
+
+### Phase 3 (MMO Features)
+
+- [ ] Chat system real-time
+- [ ] PvP combat system
+- [ ] Guild management
+- [ ] Boss raid system
+
+### Phase 4 (Advanced)
+
+- [ ] Mobile responsive
+- [ ] Advanced graphics
+- [ ] More cultivation paths
+- [ ] Economy system
+
+## 🤝 Đóng góp
+
+Chúng tôi hoan nghênh mọi đóng góp! Vui lòng:
+
+1. Fork repository
+2. Tạo feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Mở Pull Request
+
+## 📝 License
+
+Dự án được phát hành dưới license [MIT](LICENSE).
+
+## 📞 Liên hệ
+
+- **Email**: contact@tutien-game.com
+- **Discord**: [Tu Tiên Community](https://discord.gg/tutien)
+- **Facebook**: [Tu Tiên Vượt Thời Đại](https://facebook.com/tutienvuotthoidad)
+
+---
+
+_Thế giới tu tiên gặp gỡ khoa học hiện đại - Hành trình bất tử bắt đầu từ đây!_ ⚡🧬

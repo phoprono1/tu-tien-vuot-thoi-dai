@@ -1,0 +1,25 @@
+{
+  "name": "Tu Tiên Vượt Thời Đại - MMO Cultivation Game",
+  "short_name": "Tu Tiên Game",
+  "description": "Nhập vai tu tiên, khám phá thế giới tu luyện bí ẩn. Chọn con đường tu tiên của bạn và trở thành bậc thầy tu tiên.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1b4b",
+  "theme_color": "#9333ea",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png", 
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "vi",
+  "dir": "ltr"
+}
