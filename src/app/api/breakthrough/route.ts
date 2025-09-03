@@ -297,9 +297,27 @@ export async function POST(request: NextRequest) {
                         attack: newCombatStats.attack,
                         defense: newCombatStats.defense,
                         agility: newCombatStats.agility,
-                        // Keep current health proportional
-                        currentHealth: Math.min(existingStats.currentHealth, newCombatStats.maxHealth),
-                        currentStamina: Math.min(existingStats.currentStamina, newCombatStats.maxStamina),
+                        // Full heal after successful breakthrough
+                        currentHealth: newCombatStats.maxHealth,
+                        currentStamina: newCombatStats.maxStamina,
+                    }
+                );
+            } else {
+                // Create new combat stats if they don't exist
+                await databases.createDocument(
+                    DATABASE_ID,
+                    'combat_stats',
+                    'unique()',
+                    {
+                        characterId: characterId,
+                        maxHealth: newCombatStats.maxHealth,
+                        maxStamina: newCombatStats.maxStamina,
+                        attack: newCombatStats.attack,
+                        defense: newCombatStats.defense,
+                        agility: newCombatStats.agility,
+                        // Full health and stamina for new stats
+                        currentHealth: newCombatStats.maxHealth,
+                        currentStamina: newCombatStats.maxStamina,
                     }
                 );
             }
@@ -315,8 +333,8 @@ export async function POST(request: NextRequest) {
             tribulationSuccess,
             isRealmBreakthrough: requirements.isRealmBreakthrough,
             message: requirements.isRealmBreakthrough ?
-                `🎉 Đột phá thành công! Đã tiến vào cảnh giới ${newRealmDisplayName}!` :
-                `⚡ Đột phá thành công! Đã đạt ${newRealmDisplayName}!`,
+                `🎉 Đột phá thành công! Đã tiến vào cảnh giới ${newRealmDisplayName}! Thể lực và năng lượng được hồi phục hoàn toàn.` :
+                `⚡ Đột phá thành công! Đã đạt ${newRealmDisplayName}! Thể lực và năng lượng được hồi phục hoàn toàn.`,
             oldLevel: currentLevel,
             newLevel: newLevel,
             oldRealm: getRealmDisplayName(currentLevel),
