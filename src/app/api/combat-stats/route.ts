@@ -34,28 +34,32 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        // If multiple documents exist for same character (shouldn't happen), use the first one
+        if (result.documents.length > 1) {
+            console.warn(`Multiple combat stats found for character ${characterId}:`, result.documents.length);
+        }
+
         const combatStats = result.documents[0];
 
         return NextResponse.json({
-            success: true,
-            combatStats: {
-                maxHealth: combatStats.maxHealth,
-                currentHealth: combatStats.currentHealth,
-                maxStamina: combatStats.maxStamina,
-                currentStamina: combatStats.currentStamina,
-                attack: combatStats.attack,
-                defense: combatStats.defense,
-                agility: combatStats.agility,
-                criticalRate: combatStats.criticalRate,
-                counterAttackRate: combatStats.counterAttackRate,
-                multiStrikeRate: combatStats.multiStrikeRate,
-                lifeStealRate: combatStats.lifeStealRate,
-                healthRegenRate: combatStats.healthRegenRate,
-                burnRate: combatStats.burnRate,
-                poisonRate: combatStats.poisonRate,
-                freezeRate: combatStats.freezeRate,
-                stunRate: combatStats.stunRate,
-            }
+            $id: combatStats.$id,
+            characterId: combatStats.characterId,
+            maxHealth: combatStats.maxHealth,
+            currentHealth: combatStats.currentHealth,
+            maxStamina: combatStats.maxStamina,
+            currentStamina: combatStats.currentStamina,
+            attack: combatStats.attack,
+            defense: combatStats.defense,
+            agility: combatStats.agility,
+            criticalRate: combatStats.criticalRate,
+            counterAttackRate: combatStats.counterAttackRate,
+            multiStrikeRate: combatStats.multiStrikeRate,
+            lifeStealRate: combatStats.lifeStealRate,
+            healthRegenRate: combatStats.healthRegenRate,
+            burnRate: combatStats.burnRate,
+            poisonRate: combatStats.poisonRate,
+            freezeRate: combatStats.freezeRate,
+            stunRate: combatStats.stunRate,
         });
     } catch (error) {
         console.error('Lỗi khi lấy combat stats:', error);

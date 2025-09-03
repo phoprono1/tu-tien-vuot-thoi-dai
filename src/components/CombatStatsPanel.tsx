@@ -34,38 +34,62 @@ export default function CombatStatsPanel({
 }: CombatStatsPanelProps) {
   const [combatStats, setCombatStats] = useState<CombatStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [learnedSkills, setLearnedSkills] = useState<
     Array<{ skillBookId: string; element: string }>
   >([]);
 
   const loadCombatStats = useCallback(async () => {
     try {
+      console.log("Loading combat stats for character:", character.$id);
+      
       // Try to get existing combat stats with caching
       const response = await fetch(
         `/api/combat-stats?characterId=${character.$id}`
       );
 
+      console.log("Combat stats response status:", response.status);
+
       if (response.ok) {
         const stats = await response.json();
+        console.log("Combat stats loaded successfully:", stats);
         setCombatStats(stats);
         onStatsUpdate?.(stats);
+        setError(null);
       } else {
+        const errorData = await response.text();
+        console.log("Combat stats not found, error:", errorData);
+        setError(`Failed to load: ${errorData}`);
+        
         // Create new combat stats if none exist
+        console.log("Creating new combat stats for character:", character);
         const newStats = calculateBaseCombatStats(character);
+        console.log("New stats calculated:", newStats);
+        
         const createResponse = await fetch("/api/combat-stats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newStats),
         });
 
+        console.log("Create response status:", createResponse.status);
+
         if (createResponse.ok) {
           const createdStats = await createResponse.json();
+          console.log("Combat stats created successfully:", createdStats);
           setCombatStats(createdStats);
           onStatsUpdate?.(createdStats);
+          setError(null);
+        } else {
+          const createError = await createResponse.text();
+          console.error("Failed to create combat stats:", createError);
+          setError(`Failed to create: ${createError}`);
         }
       }
     } catch (error) {
       console.error("Error loading combat stats:", error);
+      setError(error instanceof Error ? error.message : "Unknown error");
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -139,6 +163,10 @@ export default function CombatStatsPanel({
   if (loading) {
     return (
       <div className="bg-gray-800 rounded-lg p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Shield className="w-5 h-5 text-blue-400" />
+          <h2 className="text-xl font-bold text-white">Combat Stats</h2>
+        </div>
         <div className="animate-pulse">
           <div className="h-4 bg-gray-700 rounded mb-4"></div>
           <div className="space-y-2">
@@ -147,6 +175,32 @@ export default function CombatStatsPanel({
             ))}
           </div>
         </div>
+        <p className="text-gray-400 text-sm mt-2">Đang tải Combat Stats...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-gray-800 rounded-lg p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Shield className="w-5 h-5 text-red-400" />
+          <h2 className="text-xl font-bold text-white">Combat Stats</h2>
+        </div>
+        <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
+          <p className="text-red-400 font-medium">Lỗi khi tải Combat Stats</p>
+          <p className="text-red-300 text-sm mt-1">{error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              loadCombatStats();
+            }}
+            className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
+          >
+            Thử lại
+          </button>
+        </div>
       </div>
     );
   }
@@ -154,7 +208,17 @@ export default function CombatStatsPanel({
   if (!combatStats) {
     return (
       <div className="bg-gray-800 rounded-lg p-6">
-        <p className="text-red-400">Không thể tải thông tin combat stats</p>
+        <div className="flex items-center gap-2 mb-4">
+          <Shield className="w-5 h-5 text-yellow-400" />
+          <h2 className="text-xl font-bold text-white">Combat Stats</h2>
+        </div>
+        <p className="text-yellow-400">Combat Stats chưa được tạo</p>
+        <button
+          onClick={loadCombatStats}
+          className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+        >
+          Tạo Combat Stats
+        </button>
       </div>
     );
   }
