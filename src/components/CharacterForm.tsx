@@ -126,6 +126,8 @@ export default function CharacterForm({
           ID.unique(),
           {
             characterId: result.$id,
+            maxHealth: 100,
+            currentHealth: 100,
             maxStamina: formData.stamina,
             currentStamina: formData.stamina,
             attack: 10,
