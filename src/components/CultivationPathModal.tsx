@@ -93,8 +93,6 @@ export default function CultivationPathModal({
           stage: 1,
           cultivationPath: path.id,
           experience: 0,
-          health: 100,
-          maxHealth: 100,
           energy: path.stats.stamina,
           maxEnergy: path.stats.stamina,
           spiritualPower: 0,
