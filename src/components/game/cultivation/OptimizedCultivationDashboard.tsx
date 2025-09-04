@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { useCultivationRate } from "@/hooks/useCultivation";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
+import { useEnergySystem } from "@/hooks/useEnergySystem";
 import { Loader2, Zap, Heart, Flame } from "lucide-react";
 
 type CultivationPath = "qi" | "body" | "demon";
@@ -22,6 +23,7 @@ export default function OptimizedCultivationDashboard({
     useState<PracticeType>("meditation");
   const { character, updateCharacter } = useAuthStore();
   const { addNotification } = useUIStore();
+  const { consumeEnergy, energyInfo, canAfford } = useEnergySystem();
 
   // Queries and mutations - called unconditionally
   const { isLoading } = useCultivationRate(character?.$id || "");
@@ -32,26 +34,29 @@ export default function OptimizedCultivationDashboard({
     if (!character) return;
 
     try {
+      const energyCost = getExpectedEnergyCost(selectedPractice);
+
+      // Use energy system to consume energy
+      const result = await consumeEnergy(selectedPractice, energyCost, {
+        practiceType: selectedPractice,
+        cultivationPath: character.cultivationPath,
+      });
+
+      if (!result.success) {
+        // Error notification already handled by useEnergySystem
+        return;
+      }
+
+      // Practice was successful, calculate experience gain
       const expGain = getExpectedExpGain(
         selectedPractice,
         character.cultivationPath
       );
-      const energyCost = getExpectedEnergyCost(selectedPractice);
 
-      if (character.energy < energyCost) {
-        addNotification({
-          type: "error",
-          title: "Không đủ năng lượng",
-          message: "Không đủ năng lượng để tu luyện!",
-        });
-        return;
-      }
-
-      // Update character optimistically
+      // Update character optimistically (energy already updated by API)
       const updatedCharacter = {
-        ...character,
+        ...result.character!,
         experience: character.experience + expGain,
-        energy: Math.max(0, character.energy - energyCost),
         cultivationProgress: character.cultivationProgress + expGain,
       };
 
@@ -74,7 +79,9 @@ export default function OptimizedCultivationDashboard({
       addNotification({
         type: "success",
         title: "Tu luyện thành công",
-        message: `${getPracticeDisplayName(selectedPractice)} hoàn thành!`,
+        message: `${getPracticeDisplayName(
+          selectedPractice
+        )} hoàn thành! +${expGain} EXP`,
       });
     } catch (error) {
       addNotification({
@@ -126,14 +133,24 @@ export default function OptimizedCultivationDashboard({
           <div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-300">Năng Lượng</span>
-              <span className="text-sm text-blue-300">
+              <span
+                className={`text-sm ${
+                  energyInfo?.isLow
+                    ? "text-red-300"
+                    : energyInfo?.percentage && energyInfo.percentage < 50
+                    ? "text-yellow-300"
+                    : "text-blue-300"
+                }`}
+              >
                 {character.energy}/{character.maxEnergy}
               </span>
             </div>
-            <Progress
-              value={(character.energy / character.maxEnergy) * 100}
-              className="h-2"
-            />
+            <Progress value={energyInfo?.percentage || 0} className="h-2" />
+            {energyInfo?.isLow && (
+              <div className="text-xs text-red-400 mt-1">
+                ⚠️ Năng lượng thấp! Hồi 10/giờ
+              </div>
+            )}
           </div>
         </div>
 
@@ -191,10 +208,16 @@ export default function OptimizedCultivationDashboard({
 
         <Button
           onClick={handlePractice}
-          disabled={character.energy < getExpectedEnergyCost(selectedPractice)}
-          className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600"
+          disabled={!canAfford(getExpectedEnergyCost(selectedPractice))}
+          className={`w-full transition-all ${
+            !canAfford(getExpectedEnergyCost(selectedPractice))
+              ? "bg-gray-600 hover:bg-gray-600 cursor-not-allowed"
+              : "bg-purple-600 hover:bg-purple-700"
+          }`}
         >
-          Bắt đầu {getPracticeDisplayName(selectedPractice)}
+          {!canAfford(getExpectedEnergyCost(selectedPractice))
+            ? `Cần ${getExpectedEnergyCost(selectedPractice)} năng lượng`
+            : `Bắt đầu ${getPracticeDisplayName(selectedPractice)}`}
         </Button>
       </div>
 

@@ -22,6 +22,7 @@ import {
   TechniqueRarity,
 } from "@/types/game";
 import { useAPICache } from "@/hooks/useOptimization";
+import { useEnergySystem } from "@/hooks/useEnergySystem";
 
 interface CultivationTechniquesProps {
   characterId: string;
@@ -52,6 +53,9 @@ const CultivationTechniques: React.FC<CultivationTechniquesProps> = ({
   const [availableTechniques, setAvailableTechniques] = useState<
     CultivationTechnique[]
   >([]);
+
+  // Energy system
+  const { consumeEnergy, canAfford } = useEnergySystem();
 
   // Helper functions to parse JSON strings
   const parseCosts = (costs: string | undefined | null) => {
@@ -217,6 +221,23 @@ const CultivationTechniques: React.FC<CultivationTechniquesProps> = ({
     setIsLearning(true);
     try {
       const costs = parseCosts(technique.costs);
+
+      // Use energy system for stamina cost
+      const staminaCost = costs.stamina || 20; // Default 20 stamina to learn
+      const energyResult = await consumeEnergy(
+        "technique_learning",
+        staminaCost,
+        {
+          techniqueId: technique.$id,
+          techniqueName: technique.name,
+          costs: costs,
+        }
+      );
+
+      if (!energyResult.success) {
+        return;
+      }
+
       await learnTechnique(characterId, technique.$id, costs);
       // Refresh learned techniques
       const learned = await learnedCache.forceRefresh();
@@ -236,6 +257,22 @@ const CultivationTechniques: React.FC<CultivationTechniquesProps> = ({
   ) => {
     setIsPracticing(true);
     try {
+      const practiceEnergyCost = 20; // Energy cost for practice
+      const energyResult = await consumeEnergy(
+        "technique_practice",
+        practiceEnergyCost,
+        {
+          learnedTechniqueId: learnedTechnique.$id,
+          techniqueLevel: learnedTechnique.level,
+          practiceType: "meditation",
+          minutes: 30,
+        }
+      );
+
+      if (!energyResult.success) {
+        return;
+      }
+
       await practiceTechnique(learnedTechnique.$id, "meditation", 30); // 30 minutes practice
       // Refresh learned techniques
       const learned = await learnedCache.forceRefresh();

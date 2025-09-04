@@ -15,6 +15,7 @@ import {
   Flame,
 } from "lucide-react";
 import { DatabaseCharacter } from "@/types/database";
+import { useAuthStore } from "@/stores/authStore";
 
 interface BreakthroughPanelProps {
   character: DatabaseCharacter;
@@ -87,6 +88,9 @@ const BreakthroughPanel: React.FC<BreakthroughPanelProps> = ({
   const [attempting, setAttempting] = useState(false);
   const [result, setResult] = useState<BreakthroughResult | null>(null);
 
+  // Get updateCharacter from auth store
+  const { updateCharacter } = useAuthStore();
+
   // Fetch breakthrough info
   useEffect(() => {
     const fetchBreakthroughInfo = async () => {
@@ -134,6 +138,19 @@ const BreakthroughPanel: React.FC<BreakthroughPanelProps> = ({
 
       // If successful, refresh data and notify parent
       if (data.success) {
+        // Update character in auth store immediately with complete data
+        if (data.newStats) {
+          const characterUpdates = {
+            ...data.newStats,
+            // Ensure we also update the level and realm if they're in the response
+            ...(data.newLevel && { level: data.newLevel }),
+            ...(data.newRealm &&
+              data.oldRealm !== data.newRealm && { realm: data.newRealm }),
+          };
+
+          updateCharacter(characterUpdates as Partial<DatabaseCharacter>);
+        }
+
         // Refresh breakthrough info
         try {
           const refreshResponse = await fetch(

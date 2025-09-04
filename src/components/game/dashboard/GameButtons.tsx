@@ -7,6 +7,7 @@ import {
   ShoppingBag,
   Users,
   Package,
+  BookOpen,
 } from "lucide-react";
 
 interface GameButtonsProps {
@@ -28,6 +29,24 @@ export default function GameButtons({ onShowModal }: GameButtonsProps) {
           <div className="font-bold text-sm sm:text-base">Tu Luyện</div>
           <div className="text-xs sm:text-sm opacity-80 hidden sm:block">
             Hấp thụ linh khí
+          </div>
+        </div>
+      </button>
+
+      {/* Advanced Cultivation Button - replaces separate Skills & Techniques */}
+      <button
+        onClick={() => onShowModal("advanced-cultivation")}
+        className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white p-3 sm:p-4 lg:p-6 rounded-lg transition-all transform hover:scale-105"
+      >
+        <div className="text-center">
+          <div className="mb-1 sm:mb-2 flex justify-center">
+            <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
+          </div>
+          <div className="font-bold text-sm sm:text-base">
+            Tu Luyện Nâng Cao
+          </div>
+          <div className="text-xs sm:text-sm opacity-80 hidden sm:block">
+            Công pháp & Võ kỹ
           </div>
         </div>
       </button>

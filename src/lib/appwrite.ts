@@ -29,5 +29,6 @@ export const COLLECTIONS = {
     COMBAT_STATS: 'combat_stats',
     SKILL_BOOKS: 'skill_books',
     LEARNED_SKILLS: 'learned_skills',
-    CHAT_MESSAGES: 'chat_messages'
+    CHAT_MESSAGES: 'chat_messages',
+    ENERGY_ACTIVITIES: 'energy_activities'
 } as const;

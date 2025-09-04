@@ -75,7 +75,6 @@ const GameDashboard: React.FC<GameDashboardProps> = ({
               character={currentCharacter}
               cultivationRate={cultivationRate}
               cultivationPaths={cultivationPaths}
-              onShowModal={handleShowModal}
             />
           </div>
 

@@ -130,7 +130,7 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
   };
 
   return (
-    <div className="flex flex-col h-48 sm:h-40 md:h-48">
+    <div className="flex flex-col h-72 sm:h-64 md:h-72">
       {/* Connection Status */}
       <div className="flex items-center mb-2 text-xs">
         <div

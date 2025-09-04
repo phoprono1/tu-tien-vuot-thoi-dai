@@ -4,7 +4,8 @@ import { CombatStatsPanel } from "../combat";
 import { SkillBooksPanel } from "../../shared";
 import {
   BreakthroughPanel,
-  OptimizedCultivationDashboard,
+  CultivationTabs,
+  CultivationTrainingTabs,
 } from "../cultivation";
 import { DatabaseCharacter } from "@/types/database";
 
@@ -32,6 +33,7 @@ export default function GameModal({
           showModal === "combat" ||
           showModal === "skills" ||
           showModal === "cultivation" ||
+          showModal === "advanced-cultivation" ||
           showModal === "breakthrough"
             ? "w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
             : "w-full max-w-md"
@@ -40,6 +42,7 @@ export default function GameModal({
         <div className="flex justify-between items-center mb-4 sm:mb-6">
           <h3 className="text-lg sm:text-xl font-bold text-white">
             {showModal === "cultivation" && "Tu Luyện"}
+            {showModal === "advanced-cultivation" && "Tu Luyện Nâng Cao"}
             {showModal === "breakthrough" && "Đột Phá"}
             {showModal === "shop" && "Cửa Hàng"}
             {showModal === "guild" && "Bang Phái"}
@@ -69,7 +72,19 @@ export default function GameModal({
 
         {/* Modal Content */}
         {showModal === "cultivation" && (
-          <OptimizedCultivationDashboard isActive={true} />
+          <CultivationTrainingTabs
+            character={character}
+            onCultivationRateRefresh={onCultivationRateRefresh}
+            onCharacterUpdate={onCharacterUpdate}
+          />
+        )}
+
+        {showModal === "advanced-cultivation" && (
+          <CultivationTabs
+            character={character}
+            onCultivationRateRefresh={onCultivationRateRefresh}
+            onCharacterUpdate={onCharacterUpdate}
+          />
         )}
 
         {showModal === "breakthrough" && (
@@ -102,9 +117,13 @@ export default function GameModal({
           />
         )}
 
-        {!["combat", "skills", "cultivation", "breakthrough"].includes(
-          showModal
-        ) && (
+        {![
+          "combat",
+          "skills",
+          "cultivation",
+          "advanced-cultivation",
+          "breakthrough",
+        ].includes(showModal) && (
           <div className="text-gray-300 text-center py-8">
             Tính năng đang được phát triển...
           </div>

@@ -13,7 +13,10 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const characterId = searchParams.get('characterId');
 
+        console.log('🔍 Combat Stats API - Character ID:', characterId);
+
         if (!characterId) {
+            console.log('❌ No character ID provided');
             return NextResponse.json(
                 { error: 'Character ID là bắt buộc' },
                 { status: 400 }
@@ -27,7 +30,13 @@ export async function GET(request: NextRequest) {
             [Query.equal('characterId', characterId)]
         );
 
+        console.log('📊 Combat Stats Query Result:', {
+            count: result.documents.length,
+            documents: result.documents
+        });
+
         if (result.documents.length === 0) {
+            console.log('❌ No combat stats found for character:', characterId);
             return NextResponse.json(
                 { error: 'Không tìm thấy combat stats cho character này' },
                 { status: 404 }
@@ -40,26 +49,30 @@ export async function GET(request: NextRequest) {
         }
 
         const combatStats = result.documents[0];
+        console.log('✅ Returning combat stats:', combatStats);
 
         return NextResponse.json({
-            $id: combatStats.$id,
-            characterId: combatStats.characterId,
-            maxHealth: combatStats.maxHealth,
-            currentHealth: combatStats.currentHealth,
-            maxStamina: combatStats.maxStamina,
-            currentStamina: combatStats.currentStamina,
-            attack: combatStats.attack,
-            defense: combatStats.defense,
-            agility: combatStats.agility,
-            criticalRate: combatStats.criticalRate,
-            counterAttackRate: combatStats.counterAttackRate,
-            multiStrikeRate: combatStats.multiStrikeRate,
-            lifeStealRate: combatStats.lifeStealRate,
-            healthRegenRate: combatStats.healthRegenRate,
-            burnRate: combatStats.burnRate,
-            poisonRate: combatStats.poisonRate,
-            freezeRate: combatStats.freezeRate,
-            stunRate: combatStats.stunRate,
+            success: true,
+            combatStats: {
+                $id: combatStats.$id,
+                characterId: combatStats.characterId,
+                maxHealth: combatStats.maxHealth,
+                currentHealth: combatStats.currentHealth,
+                maxStamina: combatStats.maxStamina,
+                currentStamina: combatStats.currentStamina,
+                attack: combatStats.attack,
+                defense: combatStats.defense,
+                agility: combatStats.agility,
+                criticalRate: combatStats.criticalRate,
+                counterAttackRate: combatStats.counterAttackRate,
+                multiStrikeRate: combatStats.multiStrikeRate,
+                lifeStealRate: combatStats.lifeStealRate,
+                healthRegenRate: combatStats.healthRegenRate,
+                burnRate: combatStats.burnRate,
+                poisonRate: combatStats.poisonRate,
+                freezeRate: combatStats.freezeRate,
+                stunRate: combatStats.stunRate,
+            }
         });
     } catch (error) {
         console.error('Lỗi khi lấy combat stats:', error);
