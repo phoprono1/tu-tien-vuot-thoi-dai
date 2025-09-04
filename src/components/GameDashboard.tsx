@@ -12,7 +12,6 @@ import {
   Package,
   LogOut,
   Clock,
-  Send,
   MessageCircle,
   FileText,
 } from "lucide-react";
@@ -20,10 +19,10 @@ import { DatabaseCharacter } from "@/types/database";
 import { databases, DATABASE_ID, COLLECTIONS } from "@/lib/appwrite";
 import CombatStatsPanel from "./CombatStatsPanel";
 import SkillBooksPanel from "./SkillBooksPanel";
-import CultivationTechniques from "./CultivationTechniques";
 import BreakthroughPanel from "./BreakthroughPanel";
+import OptimizedChat from "./OptimizedChat";
+import OptimizedCultivationDashboard from "./OptimizedCultivationDashboard";
 import { getRealmDisplayName } from "@/data/realms";
-import { useOptimizedChat } from "@/hooks/useOptimizedChat";
 
 interface User {
   $id: string;
@@ -52,15 +51,6 @@ export default function GameDashboard({
 
   // Chat and Activity Tab States
   const [activeTab, setActiveTab] = useState<"activity" | "chat">("activity");
-  const [newMessage, setNewMessage] = useState("");
-
-  // Use optimized chat hook
-  const {
-    messages: chatMessages,
-    isLoading: isLoadingChat,
-    messagesEndRef,
-    sendMessage: optimizedSendMessage,
-  } = useOptimizedChat(activeTab === "chat");
 
   // Load cultivation rate data when character changes
   useEffect(() => {
@@ -165,25 +155,6 @@ export default function GameDashboard({
     currentCharacter.lastCultivationUpdate,
     cultivationRate.finalRate,
   ]); // Dependencies cho cultivation system
-
-  // Chat Functions
-  const sendMessage = async () => {
-    if (!newMessage.trim()) return;
-
-    const success = await optimizedSendMessage(
-      user.$id,
-      currentCharacter.name,
-      newMessage
-    );
-
-    if (success) {
-      setNewMessage("");
-    } else {
-      console.error("Failed to send message");
-    }
-  };
-
-  // Remove old chat loading effect - now handled by useOptimizedChat hook
 
   const cultivationPaths = {
     qi: { name: "Khí Tu", color: "blue", icon: Zap },
@@ -553,59 +524,7 @@ export default function GameDashboard({
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col h-32 sm:h-40">
-                  {/* Chat Messages */}
-                  <div className="flex-1 overflow-y-auto space-y-1 sm:space-y-2 text-xs sm:text-sm mb-2 sm:mb-3">
-                    {isLoadingChat ? (
-                      <div className="text-center text-gray-400">
-                        Đang tải tin nhắn...
-                      </div>
-                    ) : chatMessages.length > 0 ? (
-                      chatMessages.map((message) => (
-                        <div key={message.$id} className="text-gray-300">
-                          <span className="text-purple-300">
-                            [
-                            {new Date(message.timestamp).toLocaleTimeString(
-                              "vi-VN",
-                              { hour: "2-digit", minute: "2-digit" }
-                            )}
-                            ]
-                          </span>{" "}
-                          <span className="text-yellow-300 font-medium">
-                            {message.characterName}:
-                          </span>{" "}
-                          {message.message}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center text-gray-400">
-                        Chưa có tin nhắn nào. Hãy là người đầu tiên gửi tin
-                        nhắn!
-                      </div>
-                    )}
-                    <div ref={messagesEndRef} />
-                  </div>
-
-                  {/* Chat Input */}
-                  <div className="flex gap-1 sm:gap-2">
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                      placeholder="Nhập tin nhắn..."
-                      maxLength={500}
-                      className="flex-1 px-2 sm:px-3 py-1 sm:py-2 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-400 text-xs sm:text-sm focus:outline-none focus:border-purple-400"
-                    />
-                    <button
-                      onClick={sendMessage}
-                      disabled={!newMessage.trim()}
-                      className="px-2 sm:px-3 py-1 sm:py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded transition-colors"
-                    >
-                      <Send className="w-3 h-3 sm:w-4 sm:h-4" />
-                    </button>
-                  </div>
-                </div>
+                <OptimizedChat isActive={activeTab === "chat"} />
               )}
             </div>
           </div>
@@ -657,30 +576,7 @@ export default function GameDashboard({
 
             {/* Modal Content */}
             {showModal === "cultivation" && (
-              <CultivationTechniques
-                characterId={currentCharacter.$id}
-                characterLevel={currentCharacter.level}
-                cultivationPath={
-                  currentCharacter.cultivationPath as "qi" | "body" | "demon"
-                }
-                currentQi={currentCharacter.qi}
-                spiritStones={currentCharacter.spiritStones}
-                stamina={currentCharacter.stamina}
-                onTechniqueUpdate={async () => {
-                  // Refresh cultivation rate when techniques are learned or practiced
-                  try {
-                    const response = await fetch(
-                      `/api/cultivation/rate?characterId=${currentCharacter.$id}`
-                    );
-                    const data = await response.json();
-                    if (data.success) {
-                      setCultivationRate(data.cultivationData);
-                    }
-                  } catch (error) {
-                    console.error("Error refreshing cultivation rate:", error);
-                  }
-                }}
-              />
+              <OptimizedCultivationDashboard isActive={true} />
             )}
 
             {showModal === "breakthrough" && (
