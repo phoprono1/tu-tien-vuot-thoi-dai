@@ -56,20 +56,24 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>{children}</Providers>
+
+        {/* PWA Install Prompt Helper - No Service Worker Needed */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                      console.log('SW registered: ', registration);
-                    })
-                    .catch((registrationError) => {
-                      console.log('SW registration failed: ', registrationError);
-                    });
-                });
-              }
+              // PWA install prompt (works without service worker)
+              let deferredPrompt;
+              
+              window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('PWA install prompt available');
+                deferredPrompt = e;
+                // You can show custom install button here
+              });
+
+              window.addEventListener('appinstalled', () => {
+                console.log('PWA installed successfully!');
+                deferredPrompt = null;
+              });
             `,
           }}
         />
