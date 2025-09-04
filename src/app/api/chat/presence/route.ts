@@ -15,7 +15,6 @@ setInterval(() => {
     for (const [userId, user] of onlineUsers.entries()) {
         if (now.getTime() - user.lastSeen.getTime() > offlineThreshold) {
             onlineUsers.delete(userId);
-            console.log(`🔴 User ${user.characterName} went offline`);
         }
     }
 }, 30000);
@@ -40,11 +39,9 @@ export async function POST(request: NextRequest) {
                 characterName,
                 lastSeen: now
             });
-            console.log(`🟢 User ${characterName} is online`);
         } else if (action === 'offline') {
             // User going offline
             onlineUsers.delete(userId);
-            console.log(`🔴 User ${characterName} went offline`);
         } else {
             // Heartbeat - update last seen
             const user = onlineUsers.get(userId);

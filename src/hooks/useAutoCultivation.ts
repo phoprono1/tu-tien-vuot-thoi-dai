@@ -27,8 +27,6 @@ export function useAutoCultivation(
             return;
         }
 
-        console.log('🧘 Starting optimized auto-cultivation with rate:', cultivationRate.finalRate, '/s');
-
         // Reset refs when character changes
         accumulatedQiRef.current = 0;
         lastDbUpdateTimeRef.current = Date.now();
@@ -47,8 +45,6 @@ export function useAutoCultivation(
                 const qiGain = Math.floor(timeDifferenceSeconds * rate);
 
                 if (qiGain > 0) {
-                    console.log('🧘 Cultivation tick - adding:', qiGain, 'qi (rate:', rate, '/s)');
-
                     // Update local tracking variables
                     accumulatedQiRef.current += qiGain;
                     localQiRef.current += qiGain;
@@ -64,8 +60,6 @@ export function useAutoCultivation(
                     // Batch database updates - only update every 15 seconds or 60+ qi accumulated
                     const timeSinceLastDbUpdate = now.getTime() - lastDbUpdateTimeRef.current;
                     if (timeSinceLastDbUpdate >= 15000 || accumulatedQiRef.current >= 60) {
-                        console.log('💾 Saving to database - accumulated qi:', accumulatedQiRef.current);
-
                         try {
                             await databases.updateDocument(
                                 DATABASE_ID,
@@ -79,9 +73,8 @@ export function useAutoCultivation(
 
                             lastDbUpdateTimeRef.current = Date.now();
                             accumulatedQiRef.current = 0;
-                            console.log('✅ Database updated successfully');
                         } catch (error) {
-                            console.error('❌ Database update failed:', error);
+                            console.error('Database update failed:', error);
                         }
                     }
                 }
@@ -96,7 +89,6 @@ export function useAutoCultivation(
 
         // Cleanup: Save any remaining qi when component unmounts
         return () => {
-            console.log('🧘 Stopping auto-cultivation, saving remaining qi:', accumulatedQiRef.current);
             clearInterval(interval);
 
             if (accumulatedQiRef.current > 0) {

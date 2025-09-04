@@ -59,32 +59,53 @@ export default function CharacterInfoPanel({
   // Fetch combat stats function
   const fetchCombatStats = useCallback(async () => {
     if (!currentCharacter?.$id) {
-      console.log("❌ No character ID available");
       return;
     }
 
-    console.log(
-      "🔍 Fetching combat stats for character:",
-      currentCharacter.$id
-    );
     setLoadingCombat(true);
     try {
       const response = await fetch(
         `/api/combat-stats?characterId=${currentCharacter.$id}`
       );
-      console.log("📡 API Response status:", response.status);
-
       const data = await response.json();
-      console.log("📦 API Response data:", data);
 
       if (data.success) {
-        console.log("✅ Combat stats received:", data.combatStats);
         setCombatStats(data.combatStats);
-      } else {
-        console.log("❌ API returned unsuccessful:", data);
+      } else if (response.status === 404) {
+        // Combat stats don't exist, let's create them
+        console.log(
+          "🚀 Combat stats not found, initializing for character:",
+          currentCharacter.$id
+        );
+
+        try {
+          const initResponse = await fetch("/api/combat-stats/initialize", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              characterId: currentCharacter.$id,
+            }),
+          });
+
+          const initData = await initResponse.json();
+
+          if (initData.success) {
+            console.log("✅ Combat stats initialized successfully");
+            setCombatStats(initData.combatStats);
+          } else {
+            console.error(
+              "❌ Failed to initialize combat stats:",
+              initData.error
+            );
+          }
+        } catch (initError) {
+          console.error("❌ Error initializing combat stats:", initError);
+        }
       }
     } catch (error) {
-      console.error("💥 Error fetching combat stats:", error);
+      console.error("Error fetching combat stats:", error);
     } finally {
       setLoadingCombat(false);
     }
@@ -100,24 +121,9 @@ export default function CharacterInfoPanel({
   }, [currentCharacter?.$id]);
 
   // Debug: log level changes
-  console.log(
-    "CharacterInfoPanel - Level:",
-    currentCharacter.level,
-    "Realm:",
-    getRealmDisplayName(currentCharacter.level)
-  );
-
-  // Debug: log combat stats state
-  console.log("🎯 Combat Stats State:", {
-    showCombatDetails,
-    combatStats,
-    loadingCombat,
-    characterId: currentCharacter?.$id,
-  });
-
   // Debug: track combatStats changes
   useEffect(() => {
-    console.log("🔄 Combat Stats Changed:", combatStats);
+    // console.log("🔄 Combat Stats Changed:", combatStats);
   }, [combatStats]);
 
   const currentPath =

@@ -8,8 +8,19 @@ export function useUserPresence() {
     const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
     const isActiveRef = useRef(true);
     const lastFetchRef = useRef<number>(0);
+    const presenceInitializedRef = useRef(false); // Track if presence was initialized
+
+    const lastPresenceCallRef = useRef(0);
+    const PRESENCE_DEBOUNCE_MS = 10000; // Increase to 10 seconds debounce
 
     const sendPresence = useCallback(async (action: 'online' | 'offline' | 'heartbeat') => {
+        // Debounce presence calls to prevent spam
+        const now = Date.now();
+        if (now - lastPresenceCallRef.current < PRESENCE_DEBOUNCE_MS) {
+            return;
+        }
+        lastPresenceCallRef.current = now;
+
         if (!user || !character) return;
 
         try {
@@ -73,10 +84,7 @@ export function useUserPresence() {
     useEffect(() => {
         const handleVisibilityChange = () => {
             isActiveRef.current = !document.hidden;
-            if (document.hidden) {
-                console.log('🌙 Tab hidden - reducing presence activity');
-            } else {
-                console.log('☀️ Tab visible - resuming normal presence');
+            if (!document.hidden) {
                 sendPresence('heartbeat'); // Send heartbeat when tab becomes visible
             }
         };
@@ -107,23 +115,31 @@ export function useUserPresence() {
         };
     }, [sendPresence]);
 
-    // Main presence management
+    // Main presence management - chỉ chạy 1 lần khi có user và character
     useEffect(() => {
-        if (!user || !character) return;
+        if (!user || !character) {
+            presenceInitializedRef.current = false;
+            return;
+        }
 
-        console.log('🟢 Starting user presence for:', character.name);
+        // Chỉ initialize một lần để tránh spam API calls
+        if (presenceInitializedRef.current) {
+            return;
+        }
+
+        presenceInitializedRef.current = true;
 
         // Send initial online status
         sendPresence('online');
 
-        // Set up heartbeat (every 2 minutes for efficiency)
+        // Set up heartbeat (every 3 minutes for efficiency)
         const startHeartbeat = () => {
             heartbeatRef.current = setInterval(() => {
                 // Only send heartbeat if tab is active and visible
                 if (isActiveRef.current && !document.hidden) {
                     sendPresence('heartbeat');
                 }
-            }, 120000); // 2 minutes instead of 30 seconds
+            }, 180000); // 3 minutes instead of 2 minutes
         };
 
         startHeartbeat();
@@ -133,7 +149,7 @@ export function useUserPresence() {
 
         // Cleanup function
         return () => {
-            console.log('🔴 Stopping user presence for:', character.name);
+            presenceInitializedRef.current = false;
             if (heartbeatRef.current) {
                 clearInterval(heartbeatRef.current);
             }

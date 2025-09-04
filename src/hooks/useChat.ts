@@ -103,7 +103,6 @@ export function useRealtimeChat() {
                     (response) => {
                         if (response.events.some(event => event.endsWith('.create'))) {
                             const newMessage = response.payload as ChatMessage;
-                            console.log("📡 Real-time message received:", newMessage);
 
                             // Only add to store - this will trigger re-render and auto-scroll
                             addMessage(newMessage);
@@ -112,7 +111,6 @@ export function useRealtimeChat() {
                 );
 
                 setConnected(true);
-                console.log("✅ Realtime subscription established");
                 return unsubscribe;
             });
         } catch (error) {

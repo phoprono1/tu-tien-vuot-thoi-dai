@@ -118,6 +118,9 @@ export interface Guild {
     leaderId: string;
     members: string[];
     level: number;
+    fund?: number; // Linh thạch chung của guild
+    maxMembers?: number; // Số lượng thành viên tối đa
+    dailyReward?: number; // Phần thưởng hàng ngày
     territory?: string;
     description: string;
     requirements: {

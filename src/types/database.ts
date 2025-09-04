@@ -18,6 +18,7 @@ export interface DatabaseCharacter {
     cultivationProgress: number;
     nextBreakthrough: number;
     killCount?: number;
+    guildId?: string; // Bang phái ID
     lastCultivationUpdate: string; // Để tính toán auto cultivation
     $createdAt: string;
     $updatedAt: string;

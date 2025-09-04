@@ -22,6 +22,7 @@ export const COLLECTIONS = {
     ITEMS: 'items',
     BATTLES: 'battles',
     GUILDS: 'guilds',
+    GUILD_MEMBERS: 'guild_members',
     SECTS: 'sects',
     TRIBULATIONS: 'tribulations',
     CULTIVATION_TECHNIQUES: 'cultivation_techniques',

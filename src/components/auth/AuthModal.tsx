@@ -55,8 +55,6 @@ export default function AuthModal({
             userId: newUser.$id,
             username: username,
             email: email,
-            level: 1, // Level mặc định cho người mới
-            experience: 0, // Kinh nghiệm ban đầu
             lastLogin: new Date().toISOString(),
           }
         );

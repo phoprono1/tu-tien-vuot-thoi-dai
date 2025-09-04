@@ -8,6 +8,7 @@ import {
   CultivationTrainingTabs,
 } from "../cultivation";
 import { DatabaseCharacter } from "@/types/database";
+import GuildModalOptimized from "../../guild/GuildModalOptimized";
 
 interface GameModalProps {
   showModal: string | null;
@@ -25,6 +26,17 @@ export default function GameModal({
   onCultivationRateRefresh,
 }: GameModalProps) {
   if (!showModal) return null;
+
+  // Guild modal được xử lý riêng
+  if (showModal === "guild") {
+    return (
+      <GuildModalOptimized
+        isOpen={true}
+        onClose={onCloseModal}
+        character={character}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-2 sm:p-4">

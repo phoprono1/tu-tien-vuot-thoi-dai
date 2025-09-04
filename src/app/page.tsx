@@ -29,7 +29,6 @@ export default function Home() {
       setAuthLoading(true);
       try {
         const currentUser = await account.get();
-        console.log("✅ User authenticated:", currentUser);
         setUser(currentUser);
 
         // Kiểm tra xem user đã có character chưa
@@ -42,7 +41,6 @@ export default function Home() {
         if (characters.documents.length > 0) {
           const userCharacter = characters
             .documents[0] as unknown as DatabaseCharacter;
-          console.log("✅ Character loaded:", userCharacter);
           setCharacter(userCharacter);
         } else {
           console.log("⚠️ No character found, showing path modal");
@@ -67,7 +65,6 @@ export default function Home() {
     setAuthLoading(true);
     try {
       const currentUser = await account.get();
-      console.log("✅ User authenticated:", currentUser);
       setUser(currentUser);
 
       // Kiểm tra xem user đã có character chưa

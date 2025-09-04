@@ -7,7 +7,7 @@ import {
   useSendMessage,
   useRealtimeChat,
 } from "@/hooks/useChat";
-import { useUserPresence } from "@/hooks/useUserPresence";
+import { useUserPresence } from "@/hooks/useUserPresence"; // DISABLED to stop API spam
 import { useChatStore } from "@/stores/chatStore";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -26,20 +26,13 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
   const sendMessageMutation = useSendMessage();
   const { subscribeToRealtime } = useRealtimeChat();
 
-  // User presence hook
+  // DISABLE User presence hook to stop API spam
   useUserPresence();
 
   // Simple auto-scroll to bottom
   const scrollToBottom = () => {
-    console.log(
-      "📜 scrollToBottom called, messagesEndRef.current:",
-      !!messagesEndRef.current
-    );
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-      console.log("✅ Scroll triggered");
-    } else {
-      console.log("❌ messagesEndRef.current is null");
     }
   };
 
@@ -53,8 +46,6 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
 
     let unsubscribe: (() => void) | undefined;
 
-    console.log("🔗 Setting up realtime subscription...");
-
     // Get the subscription promise and handle cleanup
     const subscriptionPromise = stableSubscribeToRealtime();
 
@@ -64,19 +55,16 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
       subscriptionPromise
         .then((unsub: () => void) => {
           unsubscribe = unsub;
-          console.log("✅ Realtime subscription callback set");
         })
         .catch((error) => {
-          console.error("❌ Realtime subscription failed:", error);
+          console.error("Realtime subscription failed:", error);
         });
     } else if (typeof subscriptionPromise === "function") {
       // It's already an unsubscribe function
       unsubscribe = subscriptionPromise;
-      console.log("✅ Direct realtime subscription set");
     }
 
     return () => {
-      console.log("🧹 Cleaning up realtime subscription");
       if (unsubscribe) {
         unsubscribe();
       }
@@ -85,7 +73,6 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    console.log("📜 Messages changed, length:", messages.length);
     if (messages.length > 0) {
       scrollToBottom();
     }
@@ -93,9 +80,7 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
 
   // Scroll to bottom when new messages arrive (realtime)
   useEffect(() => {
-    console.log("🔄 Scroll effect - messages.length:", messages.length);
     if (messages.length > 0) {
-      console.log("📜 Calling scrollToBottom because messages changed");
       scrollToBottom();
     }
   }, [messages.length]);

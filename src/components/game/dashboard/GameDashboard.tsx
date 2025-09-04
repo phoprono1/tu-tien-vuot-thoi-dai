@@ -83,14 +83,7 @@ const GameDashboard: React.FC<GameDashboardProps> = ({
   }, [activeCharacter?.$id]);
 
   // Enable optimized auto-cultivation system
-  const autoCultivationStatus = useAutoCultivation(
-    cultivationRate,
-    activeCharacter,
-    true
-  );
-
-  // Debug log for auto-cultivation status
-  console.log("🧘 Auto-cultivation status:", autoCultivationStatus);
+  useAutoCultivation(cultivationRate, activeCharacter, true);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">

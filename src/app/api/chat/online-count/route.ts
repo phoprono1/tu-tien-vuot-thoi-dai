@@ -5,7 +5,7 @@ export async function GET() {
     try {
         // In a real app, this would query Redis or database
         // For now, we'll import the count from the presence API
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3001'}/api/chat/presence`, {
+        const response = await fetch(`http://localhost:3000/api/chat/presence`, {
             method: 'GET',
             cache: 'no-store'
         });
@@ -24,7 +24,7 @@ export async function GET() {
         });
 
     } catch (error) {
-        console.error('❌ Error getting online count:', error);
+        console.error('Error getting online count:', error);
         return NextResponse.json({
             success: true,
             count: 0

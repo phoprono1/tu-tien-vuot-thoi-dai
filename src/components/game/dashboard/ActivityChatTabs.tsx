@@ -7,9 +7,6 @@ import { OptimizedChat } from "@/components/game/chat";
 export default function ActivityChatTabs() {
   const [activeTab, setActiveTab] = useState<"chat" | "activity">("chat");
 
-  // Debug log
-  console.log("ActivityChatTabs activeTab:", activeTab);
-
   return (
     <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-lg p-4 sm:p-6">
       {/* Tab Navigation */}
