@@ -1,7 +1,7 @@
 "use client";
 
-import AdminTable from "@/components/AdminTable";
-import CultivationTechniqueForm from "@/components/CultivationTechniqueForm";
+import { AdminTable } from "@/components";
+import { CultivationTechniqueForm } from "@/components/forms";
 import { COLLECTIONS } from "@/lib/appwrite";
 import {
   CultivationTechnique,

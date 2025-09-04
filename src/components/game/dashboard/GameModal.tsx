@@ -1,9 +1,11 @@
 "use client";
 
-import CombatStatsPanel from "./CombatStatsPanel";
-import SkillBooksPanel from "./SkillBooksPanel";
-import BreakthroughPanel from "./BreakthroughPanel";
-import OptimizedCultivationDashboard from "./OptimizedCultivationDashboard";
+import { CombatStatsPanel } from "../combat";
+import { SkillBooksPanel } from "../../shared";
+import {
+  BreakthroughPanel,
+  OptimizedCultivationDashboard,
+} from "../cultivation";
 import { DatabaseCharacter } from "@/types/database";
 
 interface GameModalProps {

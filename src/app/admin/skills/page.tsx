@@ -1,7 +1,7 @@
 "use client";
 
-import AdminTable from "@/components/AdminTable";
-import SkillForm from "@/components/SkillForm";
+import { AdminTable } from "@/components";
+import { SkillForm } from "@/components/forms";
 import { COLLECTIONS } from "@/lib/appwrite";
 
 interface Skill {

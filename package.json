@@ -10,7 +10,12 @@
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
     "test:build": "npm run build && npm run start",
-    "clean": "rm -rf .next"
+    "clean": "powershell -Command \"Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force node_modules/.cache -ErrorAction SilentlyContinue\"",
+    "clean:full": "powershell -Command \"Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force node_modules/.cache -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force .turbopack -ErrorAction SilentlyContinue\"",
+    "dev:clean": "npm run clean:full && npm run dev",
+    "dev:fresh": "npm run clean:full && timeout /t 2 && npm run dev",
+    "build:clean": "npm run clean:full && npm run build",
+    "reset:dev": "powershell -Command \"Write-Host 'Clearing all caches and restarting...'; Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force node_modules/.cache -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force .turbopack -ErrorAction SilentlyContinue\" && npm run dev"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.85.9",

@@ -1,7 +1,7 @@
 "use client";
 
-import AdminTable from "@/components/AdminTable";
-import CharacterForm from "@/components/CharacterForm";
+import { AdminTable } from "@/components/admin";
+import { CharacterForm } from "@/components/forms";
 import { COLLECTIONS } from "@/lib/appwrite";
 
 interface Character {

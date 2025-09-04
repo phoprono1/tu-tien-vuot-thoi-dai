@@ -6,7 +6,7 @@ import {
   isClientAdminAuthenticated,
   clearClientAdminSession,
 } from "@/lib/admin";
-import AdminAuthModal from "@/components/AdminAuthModal";
+import { AdminAuthModal } from "@/components/admin";
 
 interface AdminGuardProps {
   children: React.ReactNode;

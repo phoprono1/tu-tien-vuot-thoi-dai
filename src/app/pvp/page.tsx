@@ -1,4 +1,4 @@
-import PvPRankingsPanel from "@/components/PvPRankingsPanel";
+import { PvPRankingsPanel } from "@/components/game/combat";
 
 export default function PvPRankingsPage() {
   return (

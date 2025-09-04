@@ -1,4 +1,4 @@
-import CombatTestPanel from "@/components/CombatTestPanel";
+import { CombatTestPanel } from "@/components/game/combat";
 
 export default function CombatTestPage() {
   return (

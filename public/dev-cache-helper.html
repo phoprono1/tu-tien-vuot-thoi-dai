@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Development Cache Clear Helper</title>
+    <style>
+        body { 
+            font-family: system-ui; 
+            max-width: 600px; 
+            margin: 50px auto; 
+            padding: 20px;
+            line-height: 1.6;
+        }
+        button { 
+            padding: 12px 20px; 
+            margin: 10px 5px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px;
+        }
+        .primary { background: #0070f3; color: white; }
+        .secondary { background: #f0f0f0; color: #333; }
+        .danger { background: #e60000; color: white; }
+        .info { background: #e6f7ff; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .success { background: #f0f9e6; color: #2e7d10; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Development Cache Management</h1>
+    
+    <div class="info">
+        <strong>Having 404 chunk errors?</strong> This happens when browser caches old Next.js chunk references.
+    </div>
+
+    <h2>Quick Fixes:</h2>
+    
+    <button class="primary" onclick="clearServiceWorkers()">Clear Service Workers</button>
+    <button class="primary" onclick="clearStorage()">Clear All Storage</button>
+    <button class="danger" onclick="hardReload()">Hard Reload</button>
+    <button class="secondary" onclick="openDevTools()">Open DevTools</button>
+
+    <h2>Manual Steps:</h2>
+    <ol>
+        <li><strong>Hard Reload:</strong> Ctrl+Shift+R or Cmd+Shift+R</li>
+        <li><strong>Clear Site Data:</strong> DevTools → Application → Clear Storage</li>
+        <li><strong>Disable Cache:</strong> DevTools → Network → Disable Cache</li>
+        <li><strong>Incognito:</strong> Open in private/incognito window</li>
+    </ol>
+
+    <h2>Development Scripts:</h2>
+    <pre><code>npm run dev:fresh    # Clear all caches and start fresh
+npm run reset:dev    # Nuclear option - clear everything</code></pre>
+
+    <div id="status"></div>
+
+    <script>
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="${type}">${message}</div>`;
+            setTimeout(() => status.innerHTML = '', 3000);
+        }
+
+        function clearServiceWorkers() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => registration.unregister());
+                    showStatus('Service workers cleared!');
+                });
+            } else {
+                showStatus('No service workers found', 'info');
+            }
+        }
+
+        function clearStorage() {
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                if ('caches' in window) {
+                    caches.keys().then(names => {
+                        names.forEach(name => caches.delete(name));
+                    });
+                }
+                showStatus('Storage cleared! Refresh the page.');
+            } catch (e) {
+                showStatus('Error clearing storage: ' + e.message, 'danger');
+            }
+        }
+
+        function hardReload() {
+            window.location.reload(true);
+        }
+
+        function openDevTools() {
+            showStatus('Press F12 to open DevTools, then go to Application tab → Clear Storage', 'info');
+        }
+
+        // Auto-detect and show current cache status
+        window.addEventListener('load', () => {
+            const chunks = document.querySelectorAll('script[src*="_next/static/chunks/"]');
+            if (chunks.length === 0) {
+                showStatus('No Next.js chunks detected - you might be seeing cached content', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

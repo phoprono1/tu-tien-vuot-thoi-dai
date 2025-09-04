@@ -3,33 +3,71 @@
 import { useState, useEffect } from "react";
 import { account, databases, DATABASE_ID, COLLECTIONS } from "@/lib/appwrite";
 import { Query } from "appwrite";
-import AuthModal from "@/components/AuthModal";
-import GameDashboard from "@/components/GameDashboard";
-import CultivationPathModal from "@/components/CultivationPathModal";
+import { AuthModal, CultivationPathModal } from "@/components/auth";
+import { GameDashboard } from "@/components/game/dashboard";
 import { Zap, Sword, Shield, Users, TrendingUp, Star } from "lucide-react";
 import { DatabaseCharacter } from "@/types/database";
-
-interface User {
-  $id: string;
-  name?: string;
-  email: string;
-}
+import { useAuthStore } from "@/stores/authStore";
 
 export default function Home() {
-  const [user, setUser] = useState<User | null>(null);
-  const [character, setCharacter] = useState<DatabaseCharacter | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPathModal, setShowPathModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
+  // Use global auth store
+  const {
+    user,
+    character,
+    setUser,
+    setCharacter,
+    setLoading: setAuthLoading,
+  } = useAuthStore();
+
   useEffect(() => {
-    checkUser();
-  }, []);
+    const initAuth = async () => {
+      setAuthLoading(true);
+      try {
+        const currentUser = await account.get();
+        console.log("✅ User authenticated:", currentUser);
+        setUser(currentUser);
+
+        // Kiểm tra xem user đã có character chưa
+        const characters = await databases.listDocuments(
+          DATABASE_ID,
+          COLLECTIONS.CHARACTERS,
+          [Query.equal("userId", currentUser.$id)]
+        );
+
+        if (characters.documents.length > 0) {
+          const userCharacter = characters
+            .documents[0] as unknown as DatabaseCharacter;
+          console.log("✅ Character loaded:", userCharacter);
+          setCharacter(userCharacter);
+        } else {
+          console.log("⚠️ No character found, showing path modal");
+          // User chưa có character -> hiển thị modal chọn path
+          setShowPathModal(true);
+        }
+      } catch (error) {
+        console.log("❌ User not authenticated:", error);
+        // User not logged in
+        setUser(null);
+        setCharacter(null);
+      } finally {
+        setLoading(false);
+        setAuthLoading(false);
+      }
+    };
+
+    initAuth();
+  }, [setUser, setCharacter, setAuthLoading]);
 
   const checkUser = async () => {
+    setAuthLoading(true);
     try {
       const currentUser = await account.get();
+      console.log("✅ User authenticated:", currentUser);
       setUser(currentUser);
 
       // Kiểm tra xem user đã có character chưa
@@ -40,17 +78,23 @@ export default function Home() {
       );
 
       if (characters.documents.length > 0) {
-        setCharacter(characters.documents[0] as unknown as DatabaseCharacter);
+        const userCharacter = characters
+          .documents[0] as unknown as DatabaseCharacter;
+        console.log("✅ Character loaded:", userCharacter);
+        setCharacter(userCharacter);
       } else {
+        console.log("⚠️ No character found, showing path modal");
         // User chưa có character -> hiển thị modal chọn path
         setShowPathModal(true);
       }
-    } catch {
+    } catch (error) {
+      console.log("❌ User not authenticated:", error);
       // User not logged in
       setUser(null);
       setCharacter(null);
     } finally {
       setLoading(false);
+      setAuthLoading(false);
     }
   };
 
@@ -65,6 +109,7 @@ export default function Home() {
   };
 
   const handlePathSuccess = (newCharacter: DatabaseCharacter) => {
+    console.log("✅ Character created:", newCharacter);
     setCharacter(newCharacter);
     setShowPathModal(false);
   };
@@ -72,6 +117,7 @@ export default function Home() {
   const handleLogout = async () => {
     try {
       await account.deleteSession("current");
+      console.log("✅ User logged out");
       setUser(null);
       setCharacter(null);
     } catch (error) {

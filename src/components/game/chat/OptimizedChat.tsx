@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Send } from "lucide-react";
 import {
   useChatMessages,
@@ -18,36 +18,94 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user, character } = useAuthStore();
-  const { messages, isConnected, unreadCount } = useChatStore();
+  const { messages, isConnected } = useChatStore();
 
   // Queries and mutations
   const { isLoading: isFetching } = useChatMessages();
   const sendMessageMutation = useSendMessage();
   const { subscribeToRealtime } = useRealtimeChat();
 
-  // Auto-scroll to bottom
+  // Simple auto-scroll to bottom
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    console.log(
+      "📜 scrollToBottom called, messagesEndRef.current:",
+      !!messagesEndRef.current
+    );
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      console.log("✅ Scroll triggered");
+    } else {
+      console.log("❌ messagesEndRef.current is null");
+    }
   };
 
   // Subscribe to realtime updates when active
-  useEffect(() => {
-    if (isActive) {
-      const unsubscribe = subscribeToRealtime();
-      return unsubscribe;
-    }
-  }, [isActive, subscribeToRealtime]);
+  const stableSubscribeToRealtime = useCallback(() => {
+    return subscribeToRealtime();
+  }, [subscribeToRealtime]);
 
-  // Scroll to bottom when new messages arrive
   useEffect(() => {
+    if (!isActive) return;
+
+    let unsubscribe: (() => void) | undefined;
+
+    console.log("🔗 Setting up realtime subscription...");
+
+    // Get the subscription promise and handle cleanup
+    const subscriptionPromise = stableSubscribeToRealtime();
+
+    // Handle both promise and direct function returns
+    if (subscriptionPromise && "then" in subscriptionPromise) {
+      // It's a promise
+      subscriptionPromise
+        .then((unsub: () => void) => {
+          unsubscribe = unsub;
+          console.log("✅ Realtime subscription callback set");
+        })
+        .catch((error) => {
+          console.error("❌ Realtime subscription failed:", error);
+        });
+    } else if (typeof subscriptionPromise === "function") {
+      // It's already an unsubscribe function
+      unsubscribe = subscriptionPromise;
+      console.log("✅ Direct realtime subscription set");
+    }
+
+    return () => {
+      console.log("🧹 Cleaning up realtime subscription");
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [isActive, stableSubscribeToRealtime]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    console.log("📜 Messages changed, length:", messages.length);
     if (messages.length > 0) {
-      setTimeout(scrollToBottom, 100);
+      scrollToBottom();
+    }
+  }, [messages]);
+
+  // Scroll to bottom when new messages arrive (realtime)
+  useEffect(() => {
+    console.log("🔄 Scroll effect - messages.length:", messages.length);
+    if (messages.length > 0) {
+      console.log("📜 Calling scrollToBottom because messages changed");
+      scrollToBottom();
     }
   }, [messages.length]);
 
+  // Early return check after hooks
+  if (!isActive) {
+    return null;
+  }
+
   // Handle send message
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !user || !character) return;
+    if (!newMessage.trim() || !user || !character) {
+      return;
+    }
 
     const messageData = {
       userId: user.$id,
@@ -55,11 +113,12 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
       message: newMessage.trim(),
     };
 
-    // Clear input immediately for better UX
-    setNewMessage("");
-
-    // Send message (with optimistic update)
-    sendMessageMutation.mutate(messageData);
+    try {
+      await sendMessageMutation.mutateAsync(messageData);
+      setNewMessage(""); // Only clear on success
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
   };
 
   // Handle Enter key
@@ -70,12 +129,10 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
     }
   };
 
-  if (!isActive) return null;
-
   return (
-    <div className="flex flex-col h-32 sm:h-40">
+    <div className="flex flex-col h-48 sm:h-40 md:h-48">
       {/* Connection Status */}
-      <div className="flex items-center justify-between mb-2 text-xs">
+      <div className="flex items-center mb-2 text-xs">
         <div
           className={`flex items-center gap-1 ${
             isConnected ? "text-green-400" : "text-red-400"
@@ -88,15 +145,10 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
           />
           {isConnected ? "Kết nối" : "Mất kết nối"}
         </div>
-        {unreadCount > 0 && (
-          <div className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
-            {unreadCount} tin mới
-          </div>
-        )}
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-1 sm:space-y-2 text-xs sm:text-sm mb-2 sm:mb-3 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto space-y-1.5 sm:space-y-2 text-sm sm:text-sm mb-3 sm:mb-3 custom-scrollbar">
         {isFetching && messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             <div className="animate-spin w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full mr-2" />
@@ -104,7 +156,7 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
           </div>
         ) : messages.length > 0 ? (
           messages.map((message) => (
-            <div key={message.$id} className="text-gray-300">
+            <div key={message.$id} className="text-gray-300 leading-relaxed">
               <span className="text-purple-300">
                 [
                 {new Date(message.timestamp).toLocaleTimeString("vi-VN", {
@@ -128,7 +180,7 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
       </div>
 
       {/* Input */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-2">
         <input
           type="text"
           placeholder="Nhập tin nhắn..."
@@ -136,13 +188,13 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyPress={handleKeyPress}
           disabled={sendMessageMutation.isPending}
-          className="flex-1 px-2 sm:px-3 py-1 sm:py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm placeholder-gray-400 focus:outline-none focus:border-purple-500 disabled:opacity-50"
+          className="flex-1 px-3 py-2 sm:px-3 sm:py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm placeholder-gray-400 focus:outline-none focus:border-purple-500 disabled:opacity-50 min-h-[38px]"
           maxLength={500}
         />
         <button
           onClick={handleSendMessage}
           disabled={!newMessage.trim() || sendMessageMutation.isPending}
-          className="px-2 sm:px-3 py-1 sm:py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded flex items-center justify-center transition-colors min-w-[40px] sm:min-w-[44px]"
+          className="px-3 py-2 sm:px-3 sm:py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded flex items-center justify-center transition-colors min-w-[44px] min-h-[38px]"
         >
           {sendMessageMutation.isPending ? (
             <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />

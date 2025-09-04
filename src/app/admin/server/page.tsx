@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ServerSettingsPanel from "@/components/ServerSettingsPanel";
+import { ServerSettingsPanel } from "@/components";
 
 export default function ServerSettingsPage() {
   return (

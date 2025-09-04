@@ -1,7 +1,7 @@
 "use client";
 
-import AdminTable from "@/components/AdminTable";
-import ItemForm from "@/components/ItemForm";
+import { AdminTable } from "@/components";
+import { ItemForm } from "@/components/forms";
 import { COLLECTIONS } from "@/lib/appwrite";
 
 interface Item {

@@ -1,4 +1,4 @@
-import TrialManagementPanel from "@/components/TrialManagementPanel";
+import { TrialManagementPanel } from "@/components";
 
 export default function TrialsAdminPage() {
   return (

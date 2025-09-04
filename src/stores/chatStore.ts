@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
 
-interface ChatMessage {
+export interface ChatMessage {
     $id: string;
     userId: string;
     characterName: string;
@@ -15,7 +15,6 @@ interface ChatState {
     isLoading: boolean;
     isConnected: boolean;
     lastMessageId: string | null;
-    unreadCount: number;
     activeTab: 'activity' | 'chat';
 }
 
@@ -27,10 +26,6 @@ interface ChatActions {
     setLoading: (loading: boolean) => void;
     setConnected: (connected: boolean) => void;
     setActiveTab: (tab: 'activity' | 'chat') => void;
-    markAsRead: () => void;
-    optimisticAddMessage: (tempMessage: Omit<ChatMessage, '$id'> & { tempId: string }) => void;
-    updateOptimisticMessage: (tempId: string, realMessage: ChatMessage) => void;
-    removeOptimisticMessage: (tempId: string) => void;
 }
 
 type ChatStore = ChatState & ChatActions;
@@ -43,7 +38,6 @@ export const useChatStore = create<ChatStore>()(
             isLoading: false,
             isConnected: false,
             lastMessageId: null,
-            unreadCount: 0,
             activeTab: 'activity',
 
             // Actions
@@ -60,11 +54,6 @@ export const useChatStore = create<ChatStore>()(
                         }
 
                         state.lastMessageId = message.$id;
-
-                        // Increment unread if not on chat tab
-                        if (state.activeTab !== 'chat') {
-                            state.unreadCount++;
-                        }
                     }
                 }),
 
@@ -113,46 +102,6 @@ export const useChatStore = create<ChatStore>()(
             setActiveTab: (tab) =>
                 set((state) => {
                     state.activeTab = tab;
-                    if (tab === 'chat') {
-                        state.unreadCount = 0;
-                    }
-                }),
-
-            markAsRead: () =>
-                set((state) => {
-                    state.unreadCount = 0;
-                }),
-
-            // Optimistic updates for better UX
-            optimisticAddMessage: (tempMessage) =>
-                set((state) => {
-                    const optimisticMessage: ChatMessage = {
-                        $id: tempMessage.tempId,
-                        userId: tempMessage.userId,
-                        characterName: tempMessage.characterName,
-                        message: tempMessage.message,
-                        timestamp: tempMessage.timestamp,
-                    };
-
-                    state.messages.push(optimisticMessage);
-
-                    if (state.messages.length > 20) {
-                        state.messages = state.messages.slice(-20);
-                    }
-                }),
-
-            updateOptimisticMessage: (tempId, realMessage) =>
-                set((state) => {
-                    const index = state.messages.findIndex(m => m.$id === tempId);
-                    if (index !== -1) {
-                        state.messages[index] = realMessage;
-                        state.lastMessageId = realMessage.$id;
-                    }
-                }),
-
-            removeOptimisticMessage: (tempId) =>
-                set((state) => {
-                    state.messages = state.messages.filter(m => m.$id !== tempId);
                 }),
         })),
         { name: 'chat-store' }

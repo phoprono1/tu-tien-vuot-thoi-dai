@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import AdminGuard from "@/components/AdminGuard";
+import { AdminGuard } from "@/components/admin";
+
 import {
   Settings,
   Package,
