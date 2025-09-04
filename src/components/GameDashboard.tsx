@@ -3,11 +3,13 @@
 import React, { useState } from "react";
 import { Zap, Dumbbell, Skull } from "lucide-react";
 import { DatabaseCharacter } from "@/types/database";
-import GameHeader from "./GameHeader";
-import CharacterInfoPanel from "./CharacterInfoPanel";
-import GameButtons from "./GameButtons";
-import ActivityChatTabs from "./ActivityChatTabs";
-import GameModal from "./GameModal";
+import {
+  ActivityChatTabs,
+  CharacterInfoPanel,
+  GameButtons,
+  GameHeader,
+  GameModal,
+} from "./game/dashboard";
 
 interface GameDashboardProps {
   character: DatabaseCharacter;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { MessageCircle, FileText } from "lucide-react";
-import OptimizedChat from "./OptimizedChat";
+import { OptimizedChat } from "@/components/game/chat";
 
 export default function ActivityChatTabs() {
   const [activeTab, setActiveTab] = useState<"activity" | "chat">("activity");
