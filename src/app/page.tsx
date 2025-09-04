@@ -89,13 +89,7 @@ export default function Home() {
 
   // Nếu đã đăng nhập và có character, hiển thị game dashboard
   if (user && character) {
-    return (
-      <GameDashboard
-        user={user}
-        character={character}
-        onLogout={handleLogout}
-      />
-    );
+    return <GameDashboard character={character} onLogout={handleLogout} />;
   }
 
   // Nếu đã đăng nhập nhưng chưa có character, hiển thị modal chọn path
