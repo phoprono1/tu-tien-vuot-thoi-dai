@@ -3,6 +3,7 @@
 import { Swords, Package, Clock } from "lucide-react";
 import { DatabaseCharacter } from "@/types/database";
 import { getRealmDisplayName } from "@/data/realms";
+import { useAuthStore } from "@/stores/authStore";
 
 interface CharacterInfoPanelProps {
   character: DatabaseCharacter;
@@ -27,9 +28,15 @@ export default function CharacterInfoPanel({
   cultivationPaths,
   onShowModal,
 }: CharacterInfoPanelProps) {
+  // Get live character data from auth store
+  const { character: liveCharacter } = useAuthStore();
+
+  // Use live character data if available, fallback to props
+  const currentCharacter = liveCharacter || character;
+
   const currentPath =
     cultivationPaths[
-      character.cultivationPath as keyof typeof cultivationPaths
+      currentCharacter.cultivationPath as keyof typeof cultivationPaths
     ];
 
   return (
@@ -41,13 +48,13 @@ export default function CharacterInfoPanel({
           <currentPath.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
         </div>
         <h3 className="text-lg sm:text-xl font-bold text-white">
-          {character.name}
+          {currentCharacter.name}
         </h3>
         <div className="text-purple-300 text-xs sm:text-sm">
           {currentPath.name}
         </div>
         <div className="text-gray-400 text-xs sm:text-sm">
-          {getRealmDisplayName(character.level)}
+          {getRealmDisplayName(currentCharacter.level)}
         </div>
       </div>
 
@@ -56,7 +63,9 @@ export default function CharacterInfoPanel({
         <div>
           <div className="flex justify-between text-xs sm:text-sm">
             <span className="text-red-300">Qi</span>
-            <span className="text-white">{character.qi.toLocaleString()}</span>
+            <span className="text-white">
+              {currentCharacter.qi.toLocaleString()}
+            </span>
           </div>
           <div className="text-xs text-gray-400 mb-1 flex items-center justify-between">
             <div className="flex items-center">
@@ -80,17 +89,17 @@ export default function CharacterInfoPanel({
           <div className="flex justify-between">
             <span className="text-gray-400">Qi:</span>
             <span className="text-green-300">
-              {character.qi.toLocaleString()}
+              {currentCharacter.qi.toLocaleString()}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Stamina:</span>
-            <span className="text-yellow-300">{character.stamina}</span>
+            <span className="text-yellow-300">{currentCharacter.stamina}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Đá linh:</span>
             <span className="text-blue-300">
-              {character.spiritStones.toLocaleString()}
+              {currentCharacter.spiritStones.toLocaleString()}
             </span>
           </div>
 
@@ -132,17 +141,17 @@ export default function CharacterInfoPanel({
                 <div className="text-yellow-300 font-medium mb-1 text-xs">
                   Đặc Tính Con Đường
                 </div>
-                {character.cultivationPath === "qi" && (
+                {currentCharacter.cultivationPath === "qi" && (
                   <div className="text-xs text-blue-300">
                     🔵 Khí Tu: Đột phá dễ, tốc độ bình thường, combat thấp
                   </div>
                 )}
-                {character.cultivationPath === "body" && (
+                {currentCharacter.cultivationPath === "body" && (
                   <div className="text-xs text-green-300">
                     🟢 Thể Tu: Đột phá trung bình, tốc độ chậm, combat cao
                   </div>
                 )}
-                {character.cultivationPath === "demon" && (
+                {currentCharacter.cultivationPath === "demon" && (
                   <div className="text-xs text-red-300">
                     🔴 Ma Tu: Đột phá khó, tốc độ nhanh, combat trung bình
                   </div>

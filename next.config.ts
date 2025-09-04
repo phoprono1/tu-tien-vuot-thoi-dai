@@ -58,20 +58,7 @@ const nextConfig: NextConfig = {
       },
     ];
 
-    // Development cache busting
-    if (process.env.NODE_ENV === 'development') {
-      headers.push({
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate',
-          },
-        ],
-      });
-    }
-
-    return headers;
+    return headers; // Loại bỏ cấu hình cache cho /_next/static trong môi trường dev
   },
 
   // Simple redirects

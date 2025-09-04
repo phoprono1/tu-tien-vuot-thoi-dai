@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Zap, Dumbbell, Skull } from "lucide-react";
 import { DatabaseCharacter } from "@/types/database";
+import { useAutoCultivation } from "@/hooks/useAutoCultivation";
+import { useAuthStore } from "@/stores/authStore";
 import GameHeader from "./GameHeader";
 import CharacterInfoPanel from "./CharacterInfoPanel";
 import GameButtons from "./GameButtons";
@@ -18,6 +20,7 @@ const GameDashboard: React.FC<GameDashboardProps> = ({
   character,
   onLogout,
 }) => {
+  const { character: authCharacter } = useAuthStore();
   const [showModal, setShowModal] = useState<string | null>(null);
   const [currentCharacter, setCurrentCharacter] = useState(character);
   const [cultivationRate, setCultivationRate] = useState({
@@ -25,6 +28,9 @@ const GameDashboard: React.FC<GameDashboardProps> = ({
     totalBonusPercentage: 0,
     finalRate: 1.0,
   });
+
+  // Use the current character from auth store if available, otherwise use prop
+  const activeCharacter = authCharacter || currentCharacter;
 
   // Cultivation paths configuration
   const cultivationPaths = {
@@ -44,7 +50,7 @@ const GameDashboard: React.FC<GameDashboardProps> = ({
   const handleCultivationRateRefresh = async () => {
     try {
       const response = await fetch(
-        `/api/cultivation/rate?characterId=${currentCharacter.$id}`
+        `/api/cultivation/rate?characterId=${activeCharacter.$id}`
       );
       const data = await response.json();
       if (data.success) {
@@ -54,6 +60,37 @@ const GameDashboard: React.FC<GameDashboardProps> = ({
       console.error("Error refreshing cultivation rate:", error);
     }
   };
+
+  // Load cultivation rate data when character changes
+  useEffect(() => {
+    const fetchCultivationRate = async () => {
+      try {
+        const response = await fetch(
+          `/api/cultivation/rate?characterId=${activeCharacter.$id}`
+        );
+        const data = await response.json();
+        if (data.success) {
+          setCultivationRate(data.cultivationData);
+        }
+      } catch (error) {
+        console.error("Error fetching cultivation rate:", error);
+      }
+    };
+
+    if (activeCharacter?.$id) {
+      fetchCultivationRate();
+    }
+  }, [activeCharacter?.$id]);
+
+  // Enable optimized auto-cultivation system
+  const autoCultivationStatus = useAutoCultivation(
+    cultivationRate,
+    activeCharacter,
+    true
+  );
+
+  // Debug log for auto-cultivation status
+  console.log("🧘 Auto-cultivation status:", autoCultivationStatus);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
@@ -70,7 +107,7 @@ const GameDashboard: React.FC<GameDashboardProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 h-full">
           <div className="lg:col-span-1">
             <CharacterInfoPanel
-              character={currentCharacter}
+              character={activeCharacter}
               cultivationRate={cultivationRate}
               cultivationPaths={cultivationPaths}
               onShowModal={handleShowModal}
@@ -88,7 +125,7 @@ const GameDashboard: React.FC<GameDashboardProps> = ({
       <GameModal
         showModal={showModal}
         onCloseModal={handleCloseModal}
-        character={currentCharacter}
+        character={activeCharacter}
         onCharacterUpdate={handleCharacterUpdate}
         onCultivationRateRefresh={handleCultivationRateRefresh}
       />
