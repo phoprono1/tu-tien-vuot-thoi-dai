@@ -102,12 +102,12 @@ export default function CombatPage() {
   const [currentCombatStats, setCurrentCombatStats] =
     useState<CombatStats | null>(null);
   const [trials, setTrials] = useState<Trial[]>([]);
-  const [selectedTrial, setSelectedTrial] = useState<string>("");
   const [combatResult, setCombatResult] = useState<CombatResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"pve" | "pvp">("pve");
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [showCombatModal, setShowCombatModal] = useState(false);
+  const [currentTrialName, setCurrentTrialName] = useState<string>("");
   const [trialCooldowns, setTrialCooldowns] = useState<{
     [trialId: string]: {
       canCombat: boolean;
@@ -196,14 +196,20 @@ export default function CombatPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startPvECombat = async () => {
-    if (!currentCharacter || !selectedTrial) {
+  const startPvECombat = async (trialId: string) => {
+    if (!currentCharacter || !trialId) {
       alert("Vui lòng chọn thí luyện!");
       return;
     }
 
+    // Get trial name for display
+    const trial = trials.find((t) => t.$id === trialId);
+    if (trial) {
+      setCurrentTrialName(trial.name);
+    }
+
     // Check cooldown từ state trước
-    const cooldownInfo = trialCooldowns[selectedTrial];
+    const cooldownInfo = trialCooldowns[trialId];
     if (cooldownInfo && !cooldownInfo.canCombat) {
       alert(
         `Cần chờ ${cooldownInfo.cooldownRemaining} phút nữa để combat lại!`
@@ -220,7 +226,7 @@ export default function CombatPage() {
         },
         body: JSON.stringify({
           attackerId: currentCharacter.$id,
-          defenderId: selectedTrial,
+          defenderId: trialId,
           combatType: "pve",
         }),
       });
@@ -272,8 +278,6 @@ export default function CombatPage() {
         return "text-gray-500";
     }
   };
-
-  const selectedTrialData = trials?.find((t) => t.$id === selectedTrial);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-3 sm:p-4 lg:p-6">
@@ -333,82 +337,80 @@ export default function CombatPage() {
             </div>
 
             {activeTab === "pve" && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                {/* Current Character Display */}
-                <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6">
-                  <h2 className="text-2xl font-bold text-white mb-4">
-                    Nhân Vật Hiện Tại
-                  </h2>
-                  {currentCharacter ? (
-                    <div className="bg-blue-600/20 border-2 border-blue-400 p-4 rounded-lg">
-                      <div className="text-white font-medium text-lg">
-                        {currentCharacter.name}
+              <div className="space-y-6">
+                {/* Character Info Bar */}
+                {currentCharacter ? (
+                  <div className="bg-black/20 backdrop-blur-sm rounded-xl p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="bg-blue-600/20 border border-blue-400 p-3 rounded-lg">
+                          <div className="text-white font-bold text-lg">
+                            {currentCharacter.name}
+                          </div>
+                          <div className="text-sm text-gray-300">
+                            Cấp {currentCharacter.level} •{" "}
+                            {currentCharacter.realm} •{" "}
+                            {currentCharacter.cultivationPath}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-300">
-                        Cấp {currentCharacter.level} • {currentCharacter.realm}
-                      </div>
-                      <div className="text-sm text-cyan-400 mb-3">
-                        {currentCharacter.cultivationPath}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="bg-red-800/30 p-2 rounded">
-                          <div className="text-red-400">Máu</div>
-                          <div className="text-white">
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="text-center">
+                          <div className="text-red-400">HP</div>
+                          <div className="text-white font-bold">
                             {currentCombatStats?.currentHealth || 0}/
                             {currentCombatStats?.maxHealth || 0}
                           </div>
                         </div>
-                        <div className="bg-blue-800/30 p-2 rounded">
-                          <div className="text-blue-400">Thể Lực</div>
-                          <div className="text-white">
+                        <div className="text-center">
+                          <div className="text-blue-400">MP</div>
+                          <div className="text-white font-bold">
                             {currentCharacter.stamina}/
                             {currentCharacter.maxStamina}
                           </div>
                         </div>
-                        <div className="bg-orange-800/30 p-2 rounded">
-                          <div className="text-orange-400">Tấn Công</div>
-                          <div className="text-white">
+                        <div className="text-center">
+                          <div className="text-orange-400">ATK</div>
+                          <div className="text-white font-bold">
                             {currentCharacter.attack}
                           </div>
                         </div>
-                        <div className="bg-green-800/30 p-2 rounded">
-                          <div className="text-green-400">Phòng Thủ</div>
-                          <div className="text-white">
+                        <div className="text-center">
+                          <div className="text-green-400">DEF</div>
+                          <div className="text-white font-bold">
                             {currentCharacter.defense}
                           </div>
                         </div>
                       </div>
-                      <div className="mt-3 text-center bg-purple-800/30 p-2 rounded">
-                        <div className="text-purple-400 text-xs">Tử Khí</div>
-                        <div className="text-white text-sm">
-                          {currentCharacter.agility}
-                        </div>
-                      </div>
                     </div>
-                  ) : (
-                    <div className="text-center text-gray-400 py-8">
-                      <div className="text-lg mb-2">😴 Không có nhân vật</div>
-                      <div className="text-sm">
-                        Vui lòng tạo nhân vật trước khi chiến đấu!
-                      </div>
-                      <a
-                        href="/admin/characters"
-                        className="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                      >
-                        Tạo nhân vật
-                      </a>
+                  </div>
+                ) : (
+                  <div className="bg-red-900/20 border border-red-500 rounded-xl p-6 text-center">
+                    <div className="text-lg text-red-400 mb-2">
+                      😴 Không có nhân vật
                     </div>
-                  )}
-                </div>
+                    <div className="text-sm text-gray-300 mb-4">
+                      Vui lòng tạo nhân vật trước khi chiến đấu!
+                    </div>
+                    <a
+                      href="/admin/characters"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    >
+                      Tạo nhân vật
+                    </a>
+                  </div>
+                )}
 
-                {/* Trial Selection */}
+                {/* Trials List */}
                 <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6">
-                  <h2 className="text-2xl font-bold text-white mb-4">
-                    Chọn Thí Luyện
+                  <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                    <Swords className="w-7 h-7" />
+                    Danh Sách Thí Luyện PvE
                   </h2>
-                  <div className="space-y-3">
-                    {trials?.length > 0 ? (
-                      trials.map((trial) => {
+
+                  {trials?.length > 0 ? (
+                    <div className="space-y-4">
+                      {trials.map((trial) => {
                         const cooldownInfo = trialCooldowns[trial.$id];
                         const canCombat =
                           !cooldownInfo || cooldownInfo.canCombat;
@@ -418,150 +420,119 @@ export default function CombatPage() {
                         return (
                           <div
                             key={trial.$id}
-                            onClick={() =>
-                              canCombat && setSelectedTrial(trial.$id)
-                            }
-                            className={`p-4 rounded-lg transition-all ${
-                              selectedTrial === trial.$id && canCombat
-                                ? "bg-red-600/50 border-2 border-red-400"
-                                : canCombat
-                                ? "bg-gray-800/50 border-2 border-transparent hover:border-gray-600 cursor-pointer"
-                                : "bg-gray-700/30 border-2 border-gray-600 opacity-60 cursor-not-allowed"
-                            }`}
+                            className="bg-gray-800/50 rounded-lg p-4 border border-gray-600 hover:border-gray-500 transition-all"
                           >
-                            <div className="flex justify-between items-start">
-                              <div className="text-white font-medium">
-                                {trial.name}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className={`text-sm font-bold ${getDifficultyColor(
-                                    trial.difficulty
-                                  )}`}
-                                >
-                                  {trial.difficulty.toUpperCase()}
+                            <div className="flex items-center justify-between">
+                              {/* Trial Info */}
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <h3 className="text-white font-bold text-lg">
+                                    {trial.name}
+                                  </h3>
+                                  <span
+                                    className={`text-sm font-bold ${getDifficultyColor(
+                                      trial.difficulty
+                                    )} bg-black/30 px-2 py-1 rounded`}
+                                  >
+                                    {trial.difficulty.toUpperCase()}
+                                  </span>
+                                  {!canCombat && (
+                                    <div className="flex items-center gap-1 text-xs text-red-400 bg-red-900/30 px-2 py-1 rounded">
+                                      <Clock className="w-3 h-3" />
+                                      {cooldownMinutes}p
+                                    </div>
+                                  )}
                                 </div>
-                                {!canCombat && (
-                                  <div className="flex items-center gap-1 text-xs text-red-400 bg-red-900/30 px-2 py-1 rounded">
-                                    <Clock className="w-3 h-3" />
-                                    {cooldownMinutes}p
-                                  </div>
-                                )}
+
+                                <p className="text-gray-300 text-sm mb-2">
+                                  {trial.description}
+                                </p>
+
+                                <div className="flex items-center gap-4 text-xs">
+                                  <span className="text-gray-400">
+                                    Cấp độ: {trial.minLevel}-{trial.maxLevel}
+                                  </span>
+                                  <span className="text-gray-400">
+                                    Realm: {trial.minRealm}
+                                  </span>
+                                  <span className="text-yellow-400">
+                                    Thưởng:{" "}
+                                    {(() => {
+                                      try {
+                                        const rewardsData =
+                                          typeof trial.rewards === "string"
+                                            ? JSON.parse(trial.rewards)
+                                            : trial.rewards;
+                                        return `${
+                                          rewardsData.experience || 0
+                                        } EXP, ${
+                                          rewardsData.spirit_stones || 0
+                                        } Linh Thạch`;
+                                      } catch {
+                                        return "0 EXP, 0 Linh Thạch";
+                                      }
+                                    })()}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Combat Button */}
+                              <div className="ml-4">
+                                <button
+                                  onClick={() => startPvECombat(trial.$id)}
+                                  disabled={
+                                    !currentCharacter || isLoading || !canCombat
+                                  }
+                                  className={`px-6 py-3 rounded-lg font-bold transition-all flex items-center gap-2 min-w-[140px] justify-center ${
+                                    !canCombat
+                                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                      : !currentCharacter
+                                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                      : isLoading
+                                      ? "bg-yellow-600 text-white"
+                                      : "bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white"
+                                  }`}
+                                >
+                                  {isLoading ? (
+                                    <>
+                                      <Zap className="w-4 h-4 animate-pulse" />
+                                      Đang đấu...
+                                    </>
+                                  ) : !canCombat ? (
+                                    <>
+                                      <Clock className="w-4 h-4" />
+                                      {cooldownMinutes}p
+                                    </>
+                                  ) : !currentCharacter ? (
+                                    "Cần nhân vật"
+                                  ) : (
+                                    <>
+                                      <Swords className="w-4 h-4" />
+                                      Chiến Đấu
+                                    </>
+                                  )}
+                                </button>
                               </div>
                             </div>
-                            <div className="text-sm text-gray-300 mt-1">
-                              {trial.description}
-                            </div>
-                            <div className="text-xs text-gray-400 mt-2">
-                              Yêu cầu: Cấp {trial.minLevel}-{trial.maxLevel} •{" "}
-                              {trial.minRealm}
-                            </div>
-                            <div className="text-xs text-yellow-400 mt-1">
-                              Phần thưởng:{" "}
-                              {(() => {
-                                try {
-                                  const rewardsData =
-                                    typeof trial.rewards === "string"
-                                      ? JSON.parse(trial.rewards)
-                                      : trial.rewards;
-                                  return `${rewardsData.experience || 0} EXP, ${
-                                    rewardsData.spirit_stones || 0
-                                  } Linh Thạch`;
-                                } catch {
-                                  return "0 EXP, 0 Linh Thạch";
-                                }
-                              })()}
-                            </div>
-                            {!canCombat && (
-                              <div className="text-xs text-red-400 mt-2 flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                Cooldown: {cooldownMinutes} phút nữa
-                              </div>
-                            )}
                           </div>
                         );
-                      })
-                    ) : (
-                      <div className="text-center text-gray-400 py-8">
-                        <div className="text-lg mb-2">
-                          🎯 Không có thí luyện
-                        </div>
-                        <div className="text-sm">
-                          Vui lòng tạo thí luyện trước khi chiến đấu!
-                        </div>
-                        <a
-                          href="/admin/trials"
-                          className="inline-block mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                        >
-                          Tạo thí luyện
-                        </a>
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-400 py-12">
+                      <Swords className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <div className="text-xl mb-2">🎯 Không có thí luyện</div>
+                      <div className="text-sm mb-4">
+                        Vui lòng tạo thí luyện trước khi chiến đấu!
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Combat Actions */}
-                <div className="bg-black/20 backdrop-blur-sm rounded-xl p-6">
-                  <h2 className="text-2xl font-bold text-white mb-4">
-                    Chiến Đấu
-                  </h2>
-
-                  {currentCharacter && selectedTrialData && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-white mb-3">
-                        Trận Đấu Sắp Tới
-                      </h3>
-                      <div className="bg-gray-800/50 rounded-lg p-4 mb-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-blue-400">
-                            {currentCharacter.name}
-                          </span>
-                          <span className="text-white">VS</span>
-                          <span className="text-red-400">
-                            {selectedTrialData.name}
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-400 text-center">
-                          Cấp {currentCharacter.level}{" "}
-                          {currentCharacter.cultivationPath} vs Thí Luyện{" "}
-                          {selectedTrialData.difficulty}
-                        </div>
-                      </div>
+                      <a
+                        href="/admin/trials"
+                        className="inline-block px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                      >
+                        Tạo thí luyện
+                      </a>
                     </div>
                   )}
-
-                  <button
-                    onClick={startPvECombat}
-                    disabled={
-                      !currentCharacter ||
-                      !selectedTrial ||
-                      isLoading ||
-                      (Boolean(selectedTrial) &&
-                        trialCooldowns[selectedTrial] &&
-                        !trialCooldowns[selectedTrial].canCombat)
-                    }
-                    className="w-full bg-gradient-to-r from-red-600 to-orange-600 text-white py-3 px-6 rounded-lg font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-red-700 hover:to-orange-700 transition-all flex items-center justify-center gap-2"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Zap className="w-5 h-5 animate-pulse" />
-                        Đang Chiến Đấu...
-                      </>
-                    ) : selectedTrial &&
-                      trialCooldowns[selectedTrial] &&
-                      !trialCooldowns[selectedTrial].canCombat ? (
-                      <>
-                        <Clock className="w-5 h-5" />
-                        Cooldown{" "}
-                        {trialCooldowns[selectedTrial].cooldownRemaining}p
-                      </>
-                    ) : (
-                      <>
-                        <Swords className="w-5 h-5" />
-                        Bắt Đầu Chiến Đấu
-                      </>
-                    )}
-                  </button>
                 </div>
               </div>
             )}
@@ -645,10 +616,7 @@ export default function CombatPage() {
                             <div className="text-white font-bold">VS</div>
                             <div className="text-red-400 font-bold flex items-center gap-2">
                               <Skull className="w-5 h-5" />
-                              {
-                                trials.find((t) => t.$id === selectedTrial)
-                                  ?.name
-                              }
+                              {currentTrialName}
                             </div>
                           </div>
                         </div>

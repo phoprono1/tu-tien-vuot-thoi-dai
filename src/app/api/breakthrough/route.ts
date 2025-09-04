@@ -227,7 +227,7 @@ export async function POST(request: NextRequest) {
         const baseEnergy = 100;  // Base energy
         const newMaxEnergy = Math.floor(baseEnergy * (newRealm?.realmBonuses.energyMultiplier || 1));
 
-        // Update character
+        // Update character - only update essential fields to avoid schema conflicts
         const updateData: Record<string, string | number> = {
             level: newLevel,
             realm: newRealm?.name || character.realm,
@@ -241,25 +241,6 @@ export async function POST(request: NextRequest) {
                 Math.floor(requirements.qiRequired * 2.5) : Math.floor(requirements.qiRequired * 1.5)
         };
 
-        // Add realm breakthrough bonuses with path-specific scaling
-        if (requirements.isRealmBreakthrough && newRealm) {
-            // Combat bonus scaling by cultivation path
-            const combatBonusMultiplier = {
-                qi: 0.6,    // Lowest combat bonus (60% of base)
-                body: 1.4,  // Highest combat bonus (140% of base)
-                demon: 1.0, // Medium combat bonus (100% of base)
-            };
-
-            const pathCombatMultiplier = combatBonusMultiplier[character.cultivationPath as keyof typeof combatBonusMultiplier] || 1.0;
-
-            const attackBonus = Math.floor(newRealm.realmBonuses.baseAttackBonus * 0.1 * pathCombatMultiplier);
-            const defenseBonus = Math.floor(newRealm.realmBonuses.baseDefenseBonus * 0.1 * pathCombatMultiplier);
-
-            updateData.physicalPower = (character.physicalPower || 10) + attackBonus;
-            updateData.mentalPower = (character.mentalPower || 10) + defenseBonus;
-            updateData.spiritualPower = (character.spiritualPower || 0) + Math.floor(newLevel / 10) * 5;
-        }
-
         await databases.updateDocument(
             DATABASE_ID,
             COLLECTIONS.CHARACTERS,
@@ -267,7 +248,78 @@ export async function POST(request: NextRequest) {
             updateData
         );
 
-        // Recalculate combat stats after level change
+        // Apply power bonuses to combat stats if it's a realm breakthrough
+        if (requirements.isRealmBreakthrough && newRealm) {
+            try {
+                // Combat bonus scaling by cultivation path
+                const combatBonusMultiplier = {
+                    qi: 0.6,    // Lowest combat bonus (60% of base)
+                    body: 1.4,  // Highest combat bonus (140% of base)
+                    demon: 1.0, // Medium combat bonus (100% of base)
+                };
+
+                const pathCombatMultiplier = combatBonusMultiplier[character.cultivationPath as keyof typeof combatBonusMultiplier] || 1.0;
+
+                const attackBonus = Math.floor(newRealm.realmBonuses.baseAttackBonus * 0.1 * pathCombatMultiplier);
+                const defenseBonus = Math.floor(newRealm.realmBonuses.baseDefenseBonus * 0.1 * pathCombatMultiplier);
+                const spiritualBonus = Math.floor(newLevel / 10) * 5;
+
+                // Get existing combat stats to apply bonuses
+                const combatStatsResponse = await databases.listDocuments(
+                    DATABASE_ID,
+                    COLLECTIONS.COMBAT_STATS,
+                    [Query.equal('characterId', characterId)]
+                );
+
+                if (combatStatsResponse.documents.length > 0) {
+                    const combatStats = combatStatsResponse.documents[0];
+
+                    // Update combat stats with power bonuses - include all required fields
+                    await databases.updateDocument(
+                        DATABASE_ID,
+                        COLLECTIONS.COMBAT_STATS,
+                        combatStats.$id,
+                        {
+                            characterId: combatStats.characterId,
+                            maxHealth: combatStats.maxHealth,
+                            currentHealth: combatStats.currentHealth,
+                            maxStamina: combatStats.maxStamina,
+                            currentStamina: combatStats.currentStamina,
+                            attack: combatStats.attack,
+                            defense: combatStats.defense,
+                            agility: combatStats.agility,
+                            criticalRate: combatStats.criticalRate,
+                            counterAttackRate: combatStats.counterAttackRate,
+                            multiStrikeRate: combatStats.multiStrikeRate,
+                            lifeStealRate: combatStats.lifeStealRate,
+                            healthRegenRate: combatStats.healthRegenRate,
+                            burnRate: combatStats.burnRate,
+                            poisonRate: combatStats.poisonRate,
+                            freezeRate: combatStats.freezeRate,
+                            stunRate: combatStats.stunRate,
+                            spiritualQi: combatStats.spiritualQi,
+                            stamina: combatStats.stamina,
+                            // Apply power bonuses
+                            physicalPower: (combatStats.physicalPower || 10) + attackBonus,
+                            mentalPower: (combatStats.mentalPower || 10) + defenseBonus,
+                            spiritualPower: (combatStats.spiritualPower || 0) + spiritualBonus,
+                        }
+                    );
+
+                    console.log('Power bonuses applied to combat stats:', {
+                        attackBonus,
+                        defenseBonus,
+                        spiritualBonus,
+                        newPhysicalPower: (combatStats.physicalPower || 10) + attackBonus,
+                        newMentalPower: (combatStats.mentalPower || 10) + defenseBonus,
+                        newSpiritualPower: (combatStats.spiritualPower || 0) + spiritualBonus
+                    });
+                }
+            } catch (error) {
+                console.warn('Failed to apply power bonuses to combat stats:', error);
+                // Don't fail the entire breakthrough if bonus application fails
+            }
+        }        // Recalculate combat stats after level change
         try {
             const updatedCharacter = {
                 ...character,
@@ -285,25 +337,40 @@ export async function POST(request: NextRequest) {
             );
 
             if (existingStatsResponse.documents.length > 0) {
-                // Update existing combat stats
+                // Update existing combat stats - include all required fields
                 const existingStats = existingStatsResponse.documents[0];
                 await databases.updateDocument(
                     DATABASE_ID,
                     'combat_stats',
                     existingStats.$id,
                     {
+                        characterId: existingStats.characterId,
                         maxHealth: newCombatStats.maxHealth,
                         maxStamina: newCombatStats.maxStamina,
                         attack: newCombatStats.attack,
                         defense: newCombatStats.defense,
                         agility: newCombatStats.agility,
+                        criticalRate: existingStats.criticalRate,
+                        counterAttackRate: existingStats.counterAttackRate,
+                        multiStrikeRate: existingStats.multiStrikeRate,
+                        lifeStealRate: existingStats.lifeStealRate,
+                        healthRegenRate: existingStats.healthRegenRate,
+                        burnRate: existingStats.burnRate,
+                        poisonRate: existingStats.poisonRate,
+                        freezeRate: existingStats.freezeRate,
+                        stunRate: existingStats.stunRate,
+                        physicalPower: existingStats.physicalPower,
+                        mentalPower: existingStats.mentalPower,
+                        spiritualPower: existingStats.spiritualPower,
+                        spiritualQi: existingStats.spiritualQi,
+                        stamina: existingStats.stamina,
                         // Full heal after successful breakthrough
                         currentHealth: newCombatStats.maxHealth,
                         currentStamina: newCombatStats.maxStamina,
                     }
                 );
             } else {
-                // Create new combat stats if they don't exist
+                // Create new combat stats if they don't exist - include all required fields
                 await databases.createDocument(
                     DATABASE_ID,
                     'combat_stats',
@@ -315,6 +382,20 @@ export async function POST(request: NextRequest) {
                         attack: newCombatStats.attack,
                         defense: newCombatStats.defense,
                         agility: newCombatStats.agility,
+                        criticalRate: 5.0,
+                        counterAttackRate: 10.0,
+                        multiStrikeRate: 2.0,
+                        lifeStealRate: 5.0,
+                        healthRegenRate: 8.0,
+                        burnRate: 1.0,
+                        poisonRate: 1.0,
+                        freezeRate: 1.0,
+                        stunRate: 8.0,
+                        physicalPower: 10,
+                        mentalPower: 10,
+                        spiritualPower: 0,
+                        spiritualQi: 0,
+                        stamina: 0,
                         // Full health and stamina for new stats
                         currentHealth: newCombatStats.maxHealth,
                         currentStamina: newCombatStats.maxStamina,

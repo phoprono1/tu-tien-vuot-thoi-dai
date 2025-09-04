@@ -19,7 +19,7 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user, character } = useAuthStore();
-  const { messages, isConnected, onlineCount, onlineUsers } = useChatStore();
+  const { messages, isConnected, onlineCount } = useChatStore();
 
   // Queries and mutations
   const { isLoading: isFetching } = useChatMessages();

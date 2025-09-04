@@ -7,6 +7,7 @@ export function useUserPresence() {
     const { setOnlineUsers, updateOnlineCount } = useChatStore();
     const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
     const isActiveRef = useRef(true);
+    const lastFetchRef = useRef<number>(0);
 
     const sendPresence = useCallback(async (action: 'online' | 'offline' | 'heartbeat') => {
         if (!user || !character) return;
@@ -24,20 +25,43 @@ export function useUserPresence() {
 
             const data = await response.json();
             if (data.success) {
-                setOnlineUsers(data.onlineUsers);
+                // Only update count, not full user list for efficiency
                 updateOnlineCount(data.onlineCount);
+                if (data.onlineUsers && data.onlineUsers.length > 0) {
+                    setOnlineUsers(data.onlineUsers);
+                }
             }
         } catch (error) {
             console.error('❌ Error sending presence:', error);
         }
     }, [user, character, setOnlineUsers, updateOnlineCount]);
 
+    const fetchOnlineCount = useCallback(async () => {
+        // Cache for 30 seconds to avoid excessive requests
+        const now = Date.now();
+        if (now - lastFetchRef.current < 30000) {
+            return; // Skip if fetched recently
+        }
+        lastFetchRef.current = now;
+
+        try {
+            // Use lightweight endpoint for just getting count
+            const response = await fetch('/api/chat/online-count');
+            const data = await response.json();
+            if (data.success) {
+                updateOnlineCount(data.count);
+            }
+        } catch (error) {
+            console.error('❌ Error fetching online count:', error);
+        }
+    }, [updateOnlineCount]);
+
     const fetchOnlineUsers = useCallback(async () => {
         try {
             const response = await fetch('/api/chat/presence');
             const data = await response.json();
             if (data.success) {
-                setOnlineUsers(data.onlineUsers);
+                setOnlineUsers(data.onlineUsers || []);
                 updateOnlineCount(data.onlineCount);
             }
         } catch (error) {
@@ -92,19 +116,20 @@ export function useUserPresence() {
         // Send initial online status
         sendPresence('online');
 
-        // Set up heartbeat (every 30 seconds)
+        // Set up heartbeat (every 2 minutes for efficiency)
         const startHeartbeat = () => {
             heartbeatRef.current = setInterval(() => {
-                if (isActiveRef.current) {
+                // Only send heartbeat if tab is active and visible
+                if (isActiveRef.current && !document.hidden) {
                     sendPresence('heartbeat');
                 }
-            }, 30000); // 30 seconds
+            }, 120000); // 2 minutes instead of 30 seconds
         };
 
         startHeartbeat();
 
-        // Also fetch current online users on mount
-        fetchOnlineUsers();
+        // Only fetch count initially (lightweight)
+        fetchOnlineCount();
 
         // Cleanup function
         return () => {
@@ -114,10 +139,11 @@ export function useUserPresence() {
             }
             sendPresence('offline');
         };
-    }, [user, character, sendPresence, fetchOnlineUsers]);
+    }, [user, character, sendPresence, fetchOnlineCount]);
 
     return {
         sendPresence,
-        fetchOnlineUsers
+        fetchOnlineUsers,
+        fetchOnlineCount
     };
 }

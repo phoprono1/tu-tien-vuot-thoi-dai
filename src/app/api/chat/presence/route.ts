@@ -60,17 +60,18 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Return current online count and users list
+        // Return current online count and users list (minimal data)
         const onlineUsersList = Array.from(onlineUsers.values()).map(user => ({
             userId: user.userId,
             characterName: user.characterName,
-            lastSeen: user.lastSeen.toISOString()
+            // Remove lastSeen to reduce payload size
         }));
 
         return NextResponse.json({
             success: true,
             onlineCount: onlineUsers.size,
-            onlineUsers: onlineUsersList
+            // Only return user list if specifically requested
+            onlineUsers: onlineUsersList.length <= 10 ? onlineUsersList : []
         });
 
     } catch (error) {
