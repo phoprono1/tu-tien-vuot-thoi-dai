@@ -10,12 +10,20 @@ export interface ChatMessage {
     timestamp: string;
 }
 
+export interface OnlineUser {
+    userId: string;
+    characterName: string;
+    lastSeen: string;
+}
+
 interface ChatState {
     messages: ChatMessage[];
     isLoading: boolean;
     isConnected: boolean;
     lastMessageId: string | null;
     activeTab: 'activity' | 'chat';
+    onlineUsers: OnlineUser[];
+    onlineCount: number;
 }
 
 interface ChatActions {
@@ -26,6 +34,10 @@ interface ChatActions {
     setLoading: (loading: boolean) => void;
     setConnected: (connected: boolean) => void;
     setActiveTab: (tab: 'activity' | 'chat') => void;
+    setOnlineUsers: (users: OnlineUser[]) => void;
+    updateOnlineCount: (count: number) => void;
+    addOnlineUser: (user: OnlineUser) => void;
+    removeOnlineUser: (userId: string) => void;
 }
 
 type ChatStore = ChatState & ChatActions;
@@ -39,6 +51,8 @@ export const useChatStore = create<ChatStore>()(
             isConnected: false,
             lastMessageId: null,
             activeTab: 'activity',
+            onlineUsers: [],
+            onlineCount: 0,
 
             // Actions
             addMessage: (message) =>
@@ -102,6 +116,33 @@ export const useChatStore = create<ChatStore>()(
             setActiveTab: (tab) =>
                 set((state) => {
                     state.activeTab = tab;
+                }),
+
+            // Online users actions
+            setOnlineUsers: (users) =>
+                set((state) => {
+                    state.onlineUsers = users;
+                    state.onlineCount = users.length;
+                }),
+
+            updateOnlineCount: (count) =>
+                set((state) => {
+                    state.onlineCount = count;
+                }),
+
+            addOnlineUser: (user) =>
+                set((state) => {
+                    const exists = state.onlineUsers.some(u => u.userId === user.userId);
+                    if (!exists) {
+                        state.onlineUsers.push(user);
+                        state.onlineCount = state.onlineUsers.length;
+                    }
+                }),
+
+            removeOnlineUser: (userId) =>
+                set((state) => {
+                    state.onlineUsers = state.onlineUsers.filter(u => u.userId !== userId);
+                    state.onlineCount = state.onlineUsers.length;
                 }),
         })),
         { name: 'chat-store' }

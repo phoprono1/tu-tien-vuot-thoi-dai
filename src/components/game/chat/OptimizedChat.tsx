@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send } from "lucide-react";
+import { Send, Users } from "lucide-react";
 import {
   useChatMessages,
   useSendMessage,
   useRealtimeChat,
 } from "@/hooks/useChat";
+import { useUserPresence } from "@/hooks/useUserPresence";
 import { useChatStore } from "@/stores/chatStore";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -18,12 +19,15 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user, character } = useAuthStore();
-  const { messages, isConnected } = useChatStore();
+  const { messages, isConnected, onlineCount, onlineUsers } = useChatStore();
 
   // Queries and mutations
   const { isLoading: isFetching } = useChatMessages();
   const sendMessageMutation = useSendMessage();
   const { subscribeToRealtime } = useRealtimeChat();
+
+  // User presence hook
+  useUserPresence();
 
   // Simple auto-scroll to bottom
   const scrollToBottom = () => {
@@ -131,8 +135,8 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
 
   return (
     <div className="flex flex-col h-72 sm:h-64 md:h-72">
-      {/* Connection Status */}
-      <div className="flex items-center mb-2 text-xs">
+      {/* Connection Status & Online Count */}
+      <div className="flex items-center justify-between mb-2 text-xs">
         <div
           className={`flex items-center gap-1 ${
             isConnected ? "text-green-400" : "text-red-400"
@@ -144,6 +148,12 @@ export default function OptimizedChat({ isActive }: OptimizedChatProps) {
             }`}
           />
           {isConnected ? "Kết nối" : "Mất kết nối"}
+        </div>
+
+        {/* Online Users Count */}
+        <div className="flex items-center gap-1 text-blue-300">
+          <Users className="w-3 h-3" />
+          <span>{onlineCount} online</span>
         </div>
       </div>
 
