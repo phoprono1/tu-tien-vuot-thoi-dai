@@ -10,11 +10,7 @@ interface CultivationTrainingTabsProps {
   onCharacterUpdate?: (updates: Partial<DatabaseCharacter>) => void;
 }
 
-export default function CultivationTrainingTabs({
-  character: _character,
-  onCultivationRateRefresh: _onCultivationRateRefresh,
-  onCharacterUpdate: _onCharacterUpdate,
-}: CultivationTrainingTabsProps) {
+export default function CultivationTrainingTabs({}: CultivationTrainingTabsProps) {
   const [activeTab, setActiveTab] = useState<"alchemy" | "qi" | "body">(
     "alchemy"
   );

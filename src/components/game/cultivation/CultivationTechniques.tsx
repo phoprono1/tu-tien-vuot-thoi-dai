@@ -55,7 +55,7 @@ const CultivationTechniques: React.FC<CultivationTechniquesProps> = ({
   >([]);
 
   // Energy system
-  const { consumeEnergy, canAfford } = useEnergySystem();
+  const { consumeEnergy } = useEnergySystem();
 
   // Helper functions to parse JSON strings
   const parseCosts = (costs: string | undefined | null) => {
