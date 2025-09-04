@@ -10,10 +10,6 @@ export interface DatabaseCharacter {
     experience: number;
     energy: number;
     maxEnergy: number;
-    spiritualPower: number;
-    maxSpiritualPower: number;
-    physicalPower: number;
-    mentalPower: number;
     spiritualQi: number;
     qi: number;
     stamina: number;

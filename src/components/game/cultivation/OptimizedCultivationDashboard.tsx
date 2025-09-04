@@ -154,23 +154,15 @@ export default function OptimizedCultivationDashboard({
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-2 gap-4 mt-4">
           <div className="text-center">
-            <div className="text-xs text-gray-400">Sức Mạnh Tâm Linh</div>
-            <div className="text-lg font-bold text-red-400">
-              {character.spiritualPower}
-            </div>
+            <div className="text-xs text-gray-400">Khí Huyết Tâm Linh</div>
+            <div className="text-lg font-bold text-red-400">{character.qi}</div>
           </div>
           <div className="text-center">
-            <div className="text-xs text-gray-400">Sức Mạnh Thể Chất</div>
-            <div className="text-lg font-bold text-blue-400">
-              {character.physicalPower}
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs text-gray-400">Sức Mạnh Tinh Thần</div>
-            <div className="text-lg font-bold text-green-400">
-              {character.mentalPower}
+            <div className="text-xs text-gray-400">Linh Thạch</div>
+            <div className="text-lg font-bold text-yellow-400">
+              {character.spiritStones}
             </div>
           </div>
         </div>

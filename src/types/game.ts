@@ -20,10 +20,6 @@ export interface Character {
     // Stats
     health: number;
     maxHealth: number;
-    spiritualPower: number;
-    maxSpiritualPower: number;
-    physicalPower: number;
-    mentalPower: number;
 
     // Cultivation specific
     spiritualQi: number;
@@ -82,7 +78,6 @@ export interface CultivationRealm {
     };
     bonuses: {
         healthMultiplier: number;
-        spiritualPowerMultiplier: number;
         specialAbilities?: string[];
     };
 }
@@ -96,7 +91,7 @@ export interface Item {
     stats?: {
         attack?: number;
         defense?: number;
-        spiritualPower?: number;
+        qi?: number;
         healthBonus?: number;
     };
     requirements?: {

@@ -16,10 +16,6 @@ interface CharacterFormData {
   cultivationPath: string;
   realm: string;
   stage: number;
-  spiritualPower: number;
-  maxSpiritualPower: number;
-  physicalPower: number;
-  mentalPower: number;
   spiritualQi: number;
   qi: number;
   spiritStones: number;
@@ -61,10 +57,6 @@ export default function CharacterForm({
     cultivationPath: character?.cultivationPath || "qi",
     realm: character?.realm || "Luyện Khí",
     stage: character?.stage || 1,
-    spiritualPower: character?.spiritualPower || 0,
-    maxSpiritualPower: character?.maxSpiritualPower || 100,
-    physicalPower: character?.physicalPower || 0,
-    mentalPower: character?.mentalPower || 0,
     spiritualQi: character?.spiritualQi || 0,
     qi: character?.qi || 0,
     spiritStones: character?.spiritStones || 0,

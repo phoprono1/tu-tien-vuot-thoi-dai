@@ -44,7 +44,7 @@ export function calculateBaseCombatStats(character: DatabaseCharacter): Omit<Com
     );
 
     const maxStamina = Math.floor(
-        (LEVEL_SCALING.baseStaminaPerLevel * level * multipliers.stamina) + character.stamina
+        (LEVEL_SCALING.baseStaminaPerLevel * level * multipliers.stamina) + 50
     );
 
     const attack = Math.floor(
