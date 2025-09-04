@@ -15,7 +15,7 @@ export function useAutoCultivation(
     isEnabled: boolean = true
 ) {
     const { updateCharacter } = useAuthStore();
-    
+
     // Use refs to track accumulation without causing re-renders
     const accumulatedQiRef = useRef(0);
     const lastDbUpdateTimeRef = useRef(Date.now());
@@ -48,7 +48,7 @@ export function useAutoCultivation(
 
                 if (qiGain > 0) {
                     console.log('🧘 Cultivation tick - adding:', qiGain, 'qi (rate:', rate, '/s)');
-                    
+
                     // Update local tracking variables
                     accumulatedQiRef.current += qiGain;
                     localQiRef.current += qiGain;
@@ -65,7 +65,7 @@ export function useAutoCultivation(
                     const timeSinceLastDbUpdate = now.getTime() - lastDbUpdateTimeRef.current;
                     if (timeSinceLastDbUpdate >= 15000 || accumulatedQiRef.current >= 60) {
                         console.log('💾 Saving to database - accumulated qi:', accumulatedQiRef.current);
-                        
+
                         try {
                             await databases.updateDocument(
                                 DATABASE_ID,
@@ -76,7 +76,7 @@ export function useAutoCultivation(
                                     lastCultivationUpdate: lastCultivationUpdateRef.current,
                                 }
                             );
-                            
+
                             lastDbUpdateTimeRef.current = Date.now();
                             accumulatedQiRef.current = 0;
                             console.log('✅ Database updated successfully');
@@ -98,7 +98,7 @@ export function useAutoCultivation(
         return () => {
             console.log('🧘 Stopping auto-cultivation, saving remaining qi:', accumulatedQiRef.current);
             clearInterval(interval);
-            
+
             if (accumulatedQiRef.current > 0) {
                 databases.updateDocument(
                     DATABASE_ID,
