@@ -9,6 +9,7 @@ import {
 } from "../cultivation";
 import { DatabaseCharacter } from "@/types/database";
 import GuildModalOptimized from "../../guild/GuildModalOptimized";
+import LeaderboardModal from "./LeaderboardModal";
 
 interface GameModalProps {
   showModal: string | null;
@@ -38,6 +39,11 @@ export default function GameModal({
     );
   }
 
+  // Leaderboard modal được xử lý riêng
+  if (showModal === "leaderboard") {
+    return <LeaderboardModal isOpen={true} onClose={onCloseModal} />;
+  }
+
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-2 sm:p-4">
       <div
@@ -46,7 +52,8 @@ export default function GameModal({
           showModal === "skills" ||
           showModal === "cultivation" ||
           showModal === "advanced-cultivation" ||
-          showModal === "breakthrough"
+          showModal === "breakthrough" ||
+          showModal === "leaderboard"
             ? "w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
             : "w-full max-w-md"
         }`}
@@ -61,6 +68,7 @@ export default function GameModal({
             {showModal === "inventory" && "Túi Đồ"}
             {showModal === "combat" && "Combat Stats"}
             {showModal === "skills" && "Skill Books"}
+            {showModal === "leaderboard" && "Bảng Xếp Hạng"}
           </h3>
           <button
             onClick={onCloseModal}
@@ -135,6 +143,7 @@ export default function GameModal({
           "cultivation",
           "advanced-cultivation",
           "breakthrough",
+          "leaderboard",
         ].includes(showModal) && (
           <div className="text-gray-300 text-center py-8">
             Tính năng đang được phát triển...

@@ -8,6 +8,7 @@ import {
   Users,
   Package,
   BookOpen,
+  Trophy,
 } from "lucide-react";
 
 interface GameButtonsProps {
@@ -111,6 +112,22 @@ export default function GameButtons({ onShowModal }: GameButtonsProps) {
           <div className="font-bold text-sm sm:text-base">Bang Phái</div>
           <div className="text-xs sm:text-sm opacity-80 hidden sm:block">
             Gia nhập tổ chức
+          </div>
+        </div>
+      </button>
+
+      {/* Leaderboard Button */}
+      <button
+        onClick={() => onShowModal("leaderboard")}
+        className="bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-700 hover:to-amber-700 text-white p-3 sm:p-4 lg:p-6 rounded-lg transition-all transform hover:scale-105"
+      >
+        <div className="text-center">
+          <div className="mb-1 sm:mb-2 flex justify-center">
+            <Trophy className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
+          </div>
+          <div className="font-bold text-sm sm:text-base">Xếp Hạng</div>
+          <div className="text-xs sm:text-sm opacity-80 hidden sm:block">
+            Bảng cao thủ
           </div>
         </div>
       </button>
